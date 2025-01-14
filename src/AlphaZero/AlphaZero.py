@@ -1,3 +1,4 @@
+import os
 import random
 import numpy as np
 
@@ -85,5 +86,14 @@ class AlphaZero:
             for epoch in trange(self.args['num_epochs']):
                 self.train(memory)
 
-            torch.save(self.model.state_dict(), f"model_{iteration}.pth")
-            torch.save(self.optimizer.state_dict(), f"optimizer_{iteration}.pt")
+            # Define directories
+            model_dir = "models"
+            optimizer_dir = "optimizers"
+
+            # Ensure the directories exist
+            os.makedirs(model_dir, exist_ok=True)
+            os.makedirs(optimizer_dir, exist_ok=True)
+
+            # Save model and optimizer states
+            torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_{iteration}.pth"))
+            torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_{iteration}.pt"))
