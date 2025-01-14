@@ -58,6 +58,5 @@ class Node:
         self.value_sum += value
         self.visit_count += 1
 
-        # value = self.game.get_opponent_value(value)
         if self.parent is not None:
             self.parent.backpropagate(value)

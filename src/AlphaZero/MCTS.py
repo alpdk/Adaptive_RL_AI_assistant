@@ -34,7 +34,6 @@ class MCTS:
 
             last_move_player = node.parent.player
             value, is_terminal = self.game.get_value_and_terminated(node.state, last_move_player)
-            # value = self.game.get_opponent_value(value)
 
             if not is_terminal:
                 policy, value = self.model(torch.tensor(self.game.get_encoded_state(node.state), device=self.model.device).unsqueeze(0))

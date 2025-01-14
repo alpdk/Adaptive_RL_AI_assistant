@@ -3,6 +3,21 @@ import numpy as np
 from .Game import Game
 
 class Checkers(Game):
+    """
+    Implementation of a Checkers game with parent class GAME
+
+    Attributes:
+        row_count (int): count of rows in the game
+        column_count (int): count of columns in the game
+        figures_kinds ([int]): a list of possible figure kinds in integer format
+                               (same figures for different players should have different numbers)
+
+        self.valid_squares ([int]) : a list of squares that the game is valid for
+        index_to_move ({int -> ...}): dictionary mapping index to move (move can be of any type)
+        move_to_index ({... -> int}): dictionary mapping move to index (move can be of any type)
+        action_size (int): number of possible actions
+    """
+
     def __init__(self):
         self.row_count = 8
         self.column_count = 8
@@ -15,9 +30,25 @@ class Checkers(Game):
         self.action_size = len(self.index_to_move)
 
     def _get_figures_kinds(self):
+        """
+        Returns a list of possible figures kinds.
+
+        0 - empty figure
+        -1, 1 - usual checker
+        -2, 2 - "kinged" checker
+
+        Returns:
+            [int]: List of possible figures in integer format
+        """
         return [-2, -1, 0, 1, 2]
 
     def _get_index_to_move(self):
+        """
+        Create a dictionary mapping index to move (move can be of any type)
+
+        Returns:
+            {}: Dictionary mapping index to move (move can be of any type)
+        """
         res = {}
 
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1), (-2, -2), (-2, 2), (2, -2), (2, 2)]
@@ -38,7 +69,12 @@ class Checkers(Game):
         return res
 
     def _get_valid_squares(self):
-        """Returns a list of valid squares (dark squares) on an 8x8 board"""
+        """
+        Returns a list of valid squares (dark squares) on an row_count X column_count board
+
+        Returns:
+            list(int): List of valid squares on board
+        """
         valid_squares = []
         for row in range(self.row_count):
             for col in range(self.column_count):
@@ -48,8 +84,12 @@ class Checkers(Game):
         return valid_squares
 
     def get_initial_state(self):
-        # Initial state: set up pieces for each player
-        # Player 1 is represented by 1, and Player 2 by -1
+        """
+        Returns the initial state of the game's board
+
+        Returns:
+            np.array(): 2d array of shape (rows, columns) with initial state of figures
+        """
         state = np.zeros((self.row_count, self.column_count))
         for i, (row, col) in enumerate(self.valid_squares[:12]):  # First 12 squares for Player 2
             state[row, col] = -1
@@ -58,7 +98,17 @@ class Checkers(Game):
         return state
 
     def get_next_state(self, state, action, player):
-        # Action: a tuple (start_index, end_index) in the range 1-32
+        """
+        Generate a new state that will be reached, after making an action by players at current board
+
+        Args:
+            state (np.array): 2d array of shape (rows, columns)
+            action (int): the index of action to take
+            player (int): the index of the player who takes the action
+
+        Returns:
+            np.array(): 2d array of shape (rows, columns)
+        """
         action = self.index_to_move[action]
 
         start_index, end_index = action
@@ -83,6 +133,16 @@ class Checkers(Game):
         return new_state
 
     def get_capture_moves(self, state, player):
+        """
+        Getting a capture moves for a given state by a given player
+
+        Args:
+            state (np.array): 2d array of shape (rows, columns)
+            player (int): the index of the player who takes the action
+
+        Returns:
+            list(int): list of capture moves in index format that can be made
+        """
         res = []
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
@@ -105,6 +165,16 @@ class Checkers(Game):
         return res
 
     def get_normal_moves(self, state, player):
+        """
+        Getting a normal moves for a given state by a given player
+
+        Args:
+            state (np.array): 2d array of shape (rows, columns)
+            player (int): the index of the player who takes the action
+
+        Returns:
+            list(int): list of normal moves in index format that can be made
+        """
         res = []
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
@@ -122,6 +192,16 @@ class Checkers(Game):
         return res
 
     def get_valid_moves(self, state, cur_player=1):
+        """
+        Returns a list of valid moves that can be executed by a player (moves written in index format)
+
+        Args:
+            state (np.array): 2d array of shape (rows, columns)
+            cur_player (int): the index of the current player
+
+        Returns:
+            valid_moves (np.array(int)): list of valid moves in indexes
+        """
         player = cur_player
         valid_moves = self.get_capture_moves(state, player)
 
@@ -130,7 +210,31 @@ class Checkers(Game):
 
         return valid_moves
 
+    def get_opponent(self, player):
+        """
+        Getting opponent index.
+
+        Args:
+            player (int): the index of the player
+
+        Returns:
+            (int): the index of the opponent
+        """
+        return -player
+
     def get_next_player(self, state, action, player):
+        """
+        Returns the next player that will take the action.
+        On the base of the last move.
+
+        Args:
+            state (np.array): current game state
+            action (int): the index of the last taken action
+            player (int): the index of the player who took the action
+
+        Returns:
+            (int): index of the next player
+        """
         cur_action = self.index_to_move[action]
         next_player = self.get_opponent(player)
 
@@ -147,30 +251,31 @@ class Checkers(Game):
         return next_player
 
     def check_win(self, state, player):
-        # A player wins if the opponent has no valid moves left
+        """
+        Checks that opponent can make a move
+
+        Args:
+            state (np.array): current game state
+            player (int): the index of the player who took the last action
+
+        Returns:
+            boolean: True if the opponent can make a move
+        """
         opponent = self.get_opponent(player)
         return len(self.get_valid_moves(state, opponent)) == 0
 
     def get_value_and_terminated(self, state, player):
+        """
+        Returns current value of the game and terminated or not is it.
+
+        Args:
+            state (np.array): current game state
+            player (int): the index of the player who took the action
+
+        Returns:
+            value (int): value of the game
+            terminated (bool): terminated or not
+        """
         if self.check_win(state, player):
             return 1, True  # Player wins
         return 0, False
-
-    def get_opponent(self, player):
-        return -player
-
-    def get_opponent_value(self, value):
-        return -value
-
-    def change_perspective(self, state, player):
-        return state * player
-
-    def get_encoded_state(self, state):
-        encoded_state = np.stack(
-            [state == condition for condition in self.figures_kinds]
-        ).astype(np.float32)  # 2 represents the kinged pieces
-
-        if len(state.shape) == 3:
-            encoded_state = np.swapaxes(encoded_state, 0, 1)
-
-        return encoded_state
