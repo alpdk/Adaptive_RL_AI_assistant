@@ -19,6 +19,9 @@ class Checkers(Game):
     """
 
     def __init__(self):
+        """
+        Constructor
+        """
         self.row_count = 8
         self.column_count = 8
         self.figures_kinds = self._get_figures_kinds()

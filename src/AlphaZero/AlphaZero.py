@@ -9,7 +9,27 @@ from tqdm import trange
 from .MCTS import MCTS
 
 class AlphaZero:
+    """
+    This class provide a function that implements the AlphaZero algorithm.
+
+    Attributes:
+        model (nn.Module): model that will be used for training in algorithm
+        optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
+        game (Game): game that will be used for training in algorithm
+        args ({}): arguments that will be passed to the algorithm
+        MCTS (MCTS): MCTS that will be used for training in algorithm
+    """
+
     def __init__(self, model, optimizer, game, args):
+        """
+        Constructor for initializing the AlphaZero class
+
+        Args:
+            model (nn.Module): model that will be used for training in algorithm
+        optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
+        game (Game): game that will be used for training in algorithm
+        args ({}): arguments that will be passed to the algorithm
+        """
         self.model = model
         self.optimizer = optimizer
         self.game = game
@@ -17,6 +37,12 @@ class AlphaZero:
         self.mcts = MCTS(game, args, model)
 
     def selfPlay(self):
+        """
+        Algorithm of playing game, until will be reached a terminal state of the game
+
+        Returns:
+            memory (np.array): memory of the game
+        """
         memory = []
         player = 1
         state = self.game.get_initial_state()
@@ -49,6 +75,12 @@ class AlphaZero:
             player = self.game.get_next_player(state, action, player)
 
     def train(self, memory):
+        """
+        Training our model on a base of played games played
+
+        Args:
+            memory (np.array): memory of the games
+        """
         random.shuffle(memory)
 
         for batchIdx in range(0, len(memory), self.args['batch_size']):
@@ -73,6 +105,9 @@ class AlphaZero:
             self.optimizer.step()
 
     def learn(self):
+        """
+        Whole process of learning model on a base of played games
+        """
         for iteration in trange(self.args['num_iterations']):
             memory = []
 

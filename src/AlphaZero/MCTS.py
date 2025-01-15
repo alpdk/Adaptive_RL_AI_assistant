@@ -4,13 +4,34 @@ import numpy as np
 from .Node import Node
 
 class MCTS:
+    """
+    Class implementing Monte-Carlo Tree Search (MCTS) algorithm.
+
+    Attributes:
+        game (Game): Game that will be played.
+        args ({}): some arguments that will be passed to the MCTS algorithm.
+        model(nn.Module): the model that will be trained.
+    """
     def __init__(self, game, args, model):
+        """
+        Constructor.
+        """
         self.game = game
         self.args = args
         self.model = model
 
     @torch.no_grad()
     def search(self, state, player):
+        """
+        Method that performs MCTS search.
+
+        Args:
+            state (np.array): current state of the game
+            player (int): current player
+
+        Returns:
+            action (np.array): action probabilities
+        """
         root = Node(self.game, self.args, state, player, visit_count = 1)
 
         policy, value = self.model(torch.tensor(self.game.get_encoded_state(state), device=self.model.device).unsqueeze(0))
