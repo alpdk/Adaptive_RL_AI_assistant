@@ -94,9 +94,13 @@ class Checkers(Game):
             np.array(): 2d array of shape (rows, columns) with initial state of figures
         """
         state = np.zeros((self.row_count, self.column_count))
-        for i, (row, col) in enumerate(self.valid_squares[:12]):  # First 12 squares for Player 2
+
+        first_valid_figures = ((self.column_count // 2) * ((self.row_count - 2) // 2))
+        last_valid_figures = ((self.column_count // 2) * (self.row_count)) - first_valid_figures
+
+        for i, (row, col) in enumerate(self.valid_squares[:first_valid_figures]):  # First 12 squares for Player 2
             state[row, col] = -1
-        for i, (row, col) in enumerate(self.valid_squares[20:]):  # Last 12 squares for Player 1
+        for i, (row, col) in enumerate(self.valid_squares[last_valid_figures:]):  # Last 12 squares for Player 1
             state[row, col] = 1
         return state
 
@@ -241,13 +245,15 @@ class Checkers(Game):
         cur_action = self.index_to_move[action]
         next_player = self.get_opponent(player)
 
-        if abs(cur_action[0] - cur_action[1]) >= 7:
+        eat_step_size = (self.column_count // 2) * 2 - 1
+
+        if abs(cur_action[0] - cur_action[1]) >= eat_step_size:
             valid_moves = self.get_valid_moves(state, player)
 
             for i in valid_moves:
                 start, end = self.index_to_move[i]
 
-                if start == cur_action[1] and abs(start - end) >= 7:
+                if start == cur_action[1] and abs(start - end) >= eat_step_size:
                     next_player = player
                     break
 
