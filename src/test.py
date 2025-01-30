@@ -484,8 +484,8 @@
 import torch
 
 from games.Checkers import Checkers
-from AlphaZero.ResNet import ResNet
-from AlphaZero.AlphaZero import AlphaZero
+from src.models_structures.ResNet import ResNet
+from src.models.AlphaZero import AlphaZero
 
 checkers = Checkers()
 

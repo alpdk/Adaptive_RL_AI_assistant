@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 
 from tqdm import trange
-from .MCTS import MCTS
+from src.rl_algorithms.MCTS import MCTS
 
 class AlphaZero:
     """
@@ -122,8 +122,8 @@ class AlphaZero:
                 self.train(memory)
 
             # Define directories
-            model_dir = "models"
-            optimizer_dir = "optimizers"
+            model_dir = "trained_models"
+            optimizer_dir = "trained_optimizers"
 
             # Ensure the directories exist
             os.makedirs(model_dir, exist_ok=True)
