@@ -15,12 +15,12 @@ class Game:
         move_to_index ({... -> int}): dictionary mapping move to index (move can be of any type)
         action_size (int): number of possible actions
     """
-    row_count = 0
-    column_count = 0
-    figures_kinds = []
-    index_to_move = {}
-    move_to_index = {}
-    action_size = 0
+    row_count = None
+    column_count = None
+    figures_kinds = None
+    index_to_move = None
+    move_to_index = None
+    action_size = None
 
     def get_moves_to_np_array(self, valid_moves):
         """

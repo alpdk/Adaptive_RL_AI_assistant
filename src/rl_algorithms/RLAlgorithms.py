@@ -9,6 +9,9 @@ class RLAlgorithm:
         args  ({}): Dictionary of arguments, that will be passed to the game
         model (nn.Module): The model that will be trained.
     """
+    game = None
+    args = None
+    model = None
 
     @abstractmethod
     def search(self, state, player):

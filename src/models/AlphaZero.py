@@ -8,7 +8,9 @@ import torch.nn.functional as F
 from tqdm import trange
 from src.rl_algorithms.MCTS import MCTS
 
-class AlphaZero:
+from .ModelTemplates import ModelTemplates
+
+class AlphaZero(ModelTemplates):
     """
     This class provide a function that implements the AlphaZero algorithm.
 
@@ -107,6 +109,8 @@ class AlphaZero:
     def learn(self):
         """
         Whole process of learning model on a base of played games
+
+        In the end model and optimizer should be saved in directories "trained_models" and "trained_optimizers"
         """
         for iteration in trange(self.args['num_iterations']):
             memory = []
