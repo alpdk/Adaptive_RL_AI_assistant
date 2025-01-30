@@ -126,8 +126,8 @@ class AlphaZero(ModelTemplates):
                 self.train(memory)
 
             # Define directories
-            model_dir = "trained_models"
-            optimizer_dir = "trained_optimizers"
+            model_dir = "models_weights"
+            optimizer_dir = "optimizers_weights"
 
             # Ensure the directories exist
             os.makedirs(model_dir, exist_ok=True)
