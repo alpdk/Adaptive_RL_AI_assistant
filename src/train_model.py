@@ -4,7 +4,7 @@ from games.Checkers import Checkers
 from src.models_structures.ResNet import ResNet
 from src.models.AlphaZero import AlphaZero
 
-checkers = Checkers()
+checkers = Checkers(8, 8)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

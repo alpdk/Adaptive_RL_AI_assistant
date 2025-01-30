@@ -18,12 +18,12 @@ class Checkers(Game):
         action_size (int): number of possible actions
     """
 
-    def __init__(self):
+    def __init__(self, row_count, column_count):
         """
         Constructor
         """
-        self.row_count = 8
-        self.column_count = 8
+        self.row_count = row_count
+        self.column_count = column_count
         self.figures_kinds = self._get_figures_kinds()
 
         self.valid_squares = self._get_valid_squares()
