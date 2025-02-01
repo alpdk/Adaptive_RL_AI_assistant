@@ -112,6 +112,10 @@ class AlphaZero(ModelTemplates):
 
         In the end model and optimizer should be saved in directories "trained_models" and "trained_optimizers"
         """
+        # Define directories
+        model_dir = "models_weights"
+        optimizer_dir = "optimizers_weights"
+        
         for iteration in trange(self.args['num_iterations']):
             memory = []
 
@@ -125,14 +129,13 @@ class AlphaZero(ModelTemplates):
             for epoch in trange(self.args['num_epochs']):
                 self.train(memory)
 
-            # Define directories
-            model_dir = "models_weights"
-            optimizer_dir = "optimizers_weights"
-
             # Ensure the directories exist
             os.makedirs(model_dir, exist_ok=True)
             os.makedirs(optimizer_dir, exist_ok=True)
 
             # Save model and optimizer states
-            torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_{iteration}.pth"))
-            torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_{iteration}.pt"))
+            torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_AlphaZero_{iteration}.pth"))
+            torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_AlphaZero_{iteration}.pt"))
+
+        torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_AlphaZero.pth"))
+        torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_AlphaZero.pt"))
