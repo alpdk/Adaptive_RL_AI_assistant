@@ -37,6 +37,7 @@ class AlphaZero(ModelTemplates):
         self.game = game
         self.args = args
         self.mcts = MCTS(game, args, model)
+        self.model_name = "AlphaZero"
 
     def selfPlay(self):
         """
@@ -111,11 +112,12 @@ class AlphaZero(ModelTemplates):
         Whole process of learning model on a base of played games
 
         In the end model and optimizer should be saved in directories "trained_models" and "trained_optimizers"
+        Files should contain name of the model, and used structure.
         """
         # Define directories
         model_dir = "models_weights"
         optimizer_dir = "optimizers_weights"
-        
+
         for iteration in trange(self.args['num_iterations']):
             memory = []
 
@@ -134,8 +136,8 @@ class AlphaZero(ModelTemplates):
             os.makedirs(optimizer_dir, exist_ok=True)
 
             # Save model and optimizer states
-            torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_AlphaZero_{iteration}.pth"))
-            torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_AlphaZero_{iteration}.pt"))
+            torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_{self.model_name}_{self.model.structure_name}_{iteration}.pth"))
+            torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_{self.model_name}_{self.model.structure_name}.pt"))
 
-        torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_AlphaZero.pth"))
-        torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_AlphaZero.pt"))
+        torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_{self.model_name}_{self.model.structure_name}.pth"))
+        torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_{self.model_name}_{self.model.structure_name}.pt"))
