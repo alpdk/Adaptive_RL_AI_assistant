@@ -45,6 +45,8 @@ class ResNet(nn.Module):
 
         self.to(device)
 
+        self.structure_name = "ResNet"
+
     def forward(self, x):
         """
         Forward pass of the model.
