@@ -1,10 +1,9 @@
 import torch
 import numpy as np
 
-from .RLAlgorithms import RLAlgorithm
 from src.rl_algorithms.Node import Node
 
-class MCTS(RLAlgorithm):
+class MCTS:
     """
     Class implementing Monte-Carlo Tree Search (MCTS) algorithm.
 

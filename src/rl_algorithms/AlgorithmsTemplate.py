@@ -5,23 +5,23 @@ import torch.nn as nn
 
 from src.games import Game
 
-class ModelTemplates:
+class AlgorithmsTemplate:
     """
-    This is a parent class, for models
+    This is a parent class, for algorithms
 
     Attributes:
         model (nn.Module): model that will be used for training in algorithm
         optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
         game (Game): game that will be used for training in algorithm
         args ({}): arguments that will be passed to the algorithm
-        model_name (str): name of the model
+        algorithm_name (str): name of the algorithm
     """
 
     model = None
     optimizer = None
     game = None
     args = None
-    model_name = None
+    algorithm_name = None
 
     @abstractmethod
     def selfPlay(self):
@@ -49,6 +49,6 @@ class ModelTemplates:
         Whole process of learning model on a base of played games
 
         In the end model and optimizer should be saved in directories "trained_models" and "trained_optimizers"
-        Files should contain name of the model, and used structure.
+        Files should contain the name of the game, the name of the algorithm, and the structure used, all in lowercase format.
         """
         pass

@@ -16,6 +16,7 @@ class Checkers(Game):
         index_to_move ({int -> ...}): dictionary mapping index to move (move can be of any type)
         move_to_index ({... -> int}): dictionary mapping move to index (move can be of any type)
         action_size (int): number of possible actions
+        game_name (str): name of the game
     """
 
     def __init__(self, row_count, column_count):
@@ -31,6 +32,8 @@ class Checkers(Game):
         self.index_to_move = self._get_index_to_move()
         self.move_to_index = {v: k for k, v in self.index_to_move.items()}
         self.action_size = len(self.index_to_move)
+
+        self.game_name = "Checkers"
 
     def _get_figures_kinds(self):
         """

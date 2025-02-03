@@ -14,6 +14,7 @@ class Game:
         index_to_move ({int -> ...}): dictionary mapping index to move (move can be of any type)
         move_to_index ({... -> int}): dictionary mapping move to index (move can be of any type)
         action_size (int): number of possible actions
+        game_name (str): name of the game
     """
     row_count = None
     column_count = None
@@ -21,6 +22,7 @@ class Game:
     index_to_move = None
     move_to_index = None
     action_size = None
+    game_name = None
 
     def get_moves_to_np_array(self, valid_moves):
         """

@@ -6,11 +6,12 @@ import torch
 import torch.nn.functional as F
 
 from tqdm import trange
-from src.rl_algorithms.MCTS import MCTS
+from src.rl_algorithms.AlphaZero.MCTS import MCTS
 
-from .ModelTemplates import ModelTemplates
+from src.rl_algorithms.AlgorithmsTemplate import AlgorithmsTemplate
 
-class AlphaZero(ModelTemplates):
+
+class AlphaZero(AlgorithmsTemplate):
     """
     This class provide a function that implements the AlphaZero algorithm.
 
@@ -20,6 +21,7 @@ class AlphaZero(ModelTemplates):
         game (Game): game that will be used for training in algorithm
         args ({}): arguments that will be passed to the algorithm
         MCTS (MCTS): MCTS that will be used for training in algorithm
+        algorithm_name (str): name of the algorithm
     """
 
     def __init__(self, model, optimizer, game, args):
@@ -37,7 +39,7 @@ class AlphaZero(ModelTemplates):
         self.game = game
         self.args = args
         self.mcts = MCTS(game, args, model)
-        self.model_name = "AlphaZero"
+        self.algorithm_name = "AlphaZero"
 
     def selfPlay(self):
         """
@@ -112,7 +114,7 @@ class AlphaZero(ModelTemplates):
         Whole process of learning model on a base of played games
 
         In the end model and optimizer should be saved in directories "trained_models" and "trained_optimizers"
-        Files should contain name of the model, and used structure.
+        Files should contain the name of the game, the name of the algorithm, and the structure used, all in lowercase format.
         """
         # Define directories
         model_dir = "models_weights"
@@ -136,8 +138,14 @@ class AlphaZero(ModelTemplates):
             os.makedirs(optimizer_dir, exist_ok=True)
 
             # Save model and optimizer states
-            torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_{self.model_name}_{self.model.structure_name}_{iteration}.pth"))
-            torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_{self.model_name}_{self.model.structure_name}.pt"))
+            torch.save(self.model.state_dict(), os.path.join(model_dir,
+                                                             f"model_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}_{iteration}.pth"))
 
-        torch.save(self.model.state_dict(), os.path.join(model_dir, f"model_{self.model_name}_{self.model.structure_name}.pth"))
-        torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir, f"optimizer_{self.model_name}_{self.model.structure_name}.pt"))
+            torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir,
+                                                                 f"optimizer_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}_{iteration}.pt"))
+
+        torch.save(self.model.state_dict(), os.path.join(model_dir,
+                                                         f"model_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}.pth"))
+
+        torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir,
+                                                             f"optimizer_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}.pt"))
