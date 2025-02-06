@@ -133,19 +133,8 @@ class AlphaZero(AlgorithmsTemplate):
             for epoch in trange(self.args['num_epochs']):
                 self.train(memory)
 
-            # Ensure the directories exist
-            os.makedirs(model_dir, exist_ok=True)
-            os.makedirs(optimizer_dir, exist_ok=True)
+            self.save_weights(self.model.state_dict(), model_dir, "model", "pth", iteration)
+            self.save_weights(self.optimizer.state_dict(), optimizer_dir, "optimizer", "pt", iteration)
 
-            # Save model and optimizer states
-            torch.save(self.model.state_dict(), os.path.join(model_dir,
-                                                             f"model_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}_{iteration}.pth"))
-
-            torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir,
-                                                                 f"optimizer_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}_{iteration}.pt"))
-
-        torch.save(self.model.state_dict(), os.path.join(model_dir,
-                                                         f"model_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}.pth"))
-
-        torch.save(self.optimizer.state_dict(), os.path.join(optimizer_dir,
-                                                             f"optimizer_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}.pt"))
+        self.save_weights(self.model.state_dict(), model_dir, "model", "pth")
+        self.save_weights(self.optimizer.state_dict(), optimizer_dir, "optimizer", "pt")

@@ -1,9 +1,11 @@
 from abc import abstractmethod
 
+import os
 import torch
 import torch.nn as nn
 
 from src.games import Game
+
 
 class AlgorithmsTemplate:
     """
@@ -22,6 +24,30 @@ class AlgorithmsTemplate:
     game = None
     args = None
     algorithm_name = None
+
+    def save_weights(self, state_dict, directory_to_save, whose_weights, file_type, iteration=None):
+        """
+        Method for saving the weights of the model or optimizer
+
+        Parameters:
+        state_dict (dict): state dict to be saved
+        directory_to_save (string): directory to save the weights to
+        whose_weights (string): whose weights will be saved
+        file_type (string): file type of the weights
+        iteration (string): iteration name, of the step
+        """
+        os.makedirs(directory_to_save, exist_ok=True)
+
+        result_file_name = f"{whose_weights}_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}"
+
+        if iteration is not None:
+            result_file_name = result_file_name + f"_{iteration}"
+
+        result_file_name = result_file_name + f".{file_type}"
+
+        path = os.path.join(directory_to_save, result_file_name)
+
+        torch.save(state_dict, path)
 
     @abstractmethod
     def selfPlay(self):
