@@ -1,6 +1,8 @@
 import numpy as np
 
 from .Game import Game
+from .LoggerNode import LoggerNode
+
 
 class Checkers(Game):
     """
@@ -34,6 +36,8 @@ class Checkers(Game):
         self.action_size = len(self.index_to_move)
 
         self.game_name = "Checkers"
+        self.logger = LoggerNode(self._get_initial_state(), 1, -1, np.array([0, 0, 0], dtype=object),
+                                 None, None)
 
     def _get_figures_kinds(self):
         """
@@ -89,7 +93,7 @@ class Checkers(Game):
                     valid_squares.append((row, col))
         return valid_squares
 
-    def get_initial_state(self):
+    def _get_initial_state(self):
         """
         Returns the initial state of the game's board
 
@@ -107,47 +111,58 @@ class Checkers(Game):
             state[row, col] = 1
         return state
 
-    def get_next_state(self, state, action, player):
+    def make_move(self, action, player):
         """
         Generate a new state that will be reached, after making an action by players at current board
 
         Args:
-            state (np.array): 2d array of shape (rows, columns)
             action (int): the index of action to take
             player (int): the index of the player who takes the action
-
-        Returns:
-            np.array(): 2d array of shape (rows, columns)
         """
+        new_game_log = LoggerNode()
+        new_game_log.last_action = action
+        add_vars = np.array([0, 0, 0], dtype=object)
+        add_vars[0] = self.logger.additional_vars[0] + 1
+
         action = self.index_to_move[action]
 
         start_index, end_index = action
         start_row, start_col = self.valid_squares[start_index - 1]
         end_row, end_col = self.valid_squares[end_index - 1]
 
-        new_state = state.copy()
+        new_state = self.logger.current_state.copy()
 
         # Move the piece
-        new_state[start_row, start_col], new_state[end_row, end_col] = new_state[end_row, end_col], new_state[start_row, start_col]
+        new_state[start_row, start_col], new_state[end_row, end_col] = new_state[end_row, end_col], new_state[
+            start_row, start_col]
 
         # Check if a piece needs to be "kinged"
         if (player == 1 and end_row == 0) or (player == -1 and end_row == self.row_count - 1):
             new_state[end_row, end_col] = player * 2  # Kinged piece
+            add_vars[1] = 1
 
         # Check for capture
         if abs(start_row - end_row) == 2:
             mid_row = (start_row + end_row) // 2
             mid_col = (start_col + end_col) // 2
+            add_vars[2] = new_state[mid_row, mid_col]
             new_state[mid_row, mid_col] = 0  # Capture the opponent's piece
 
-        return new_state
+        new_game_log.current_state = new_state
+        new_game_log.additional_vars = add_vars
 
-    def get_capture_moves(self, state, player):
+        new_game_log.current_player = self.get_next_player(new_game_log.last_action, player)
+
+        self.logger.child = new_game_log
+        new_game_log.parent = self.logger
+
+        self.logger = self.logger.child
+
+    def _get_capture_moves(self, player):
         """
         Getting a capture moves for a given state by a given player
 
         Args:
-            state (np.array): 2d array of shape (rows, columns)
             player (int): the index of the player who takes the action
 
         Returns:
@@ -157,29 +172,32 @@ class Checkers(Game):
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
         for i, (row, col) in enumerate(self.valid_squares):
-            if state[row, col] == player or state[row, col] == player * 2:
+            if self.logger.current_state[row, col] == player or self.logger.current_state[row, col] == player * 2:
                 for dr, dc in directions:
-                    if dr * player > 0 and state[row, col] != player * 2:
+                    if dr * player > 0 and self.logger.current_state[row, col] != player * 2:
                         continue
 
                     new_row = row + dr
                     new_col = col + dc
 
                     if 0 <= new_row < self.row_count and 0 <= new_col < self.column_count:
-                        if state[new_row, new_col] == -player or state[new_row, new_col] == -player * 2:
+                        if (self.logger.current_state[new_row, new_col] == -player or
+                                self.logger.current_state[new_row, new_col] == -player * 2):
                             capture_row = new_row + dr
                             capture_col = new_col + dc
 
-                            if 0 <= capture_row < self.row_count and 0 <= capture_col < self.column_count and state[capture_row, capture_col] == 0:
-                                res.append(self.move_to_index[(i + 1, self.valid_squares.index((capture_row, capture_col)) + 1)])
+                            if (0 <= capture_row < self.row_count and
+                                    0 <= capture_col < self.column_count and
+                                    self.logger.current_state[capture_row, capture_col] == 0):
+                                res.append(self.move_to_index[
+                                               (i + 1, self.valid_squares.index((capture_row, capture_col)) + 1)])
         return res
 
-    def get_normal_moves(self, state, player):
+    def _get_normal_moves(self, player):
         """
         Getting a normal moves for a given state by a given player
 
         Args:
-            state (np.array): 2d array of shape (rows, columns)
             player (int): the index of the player who takes the action
 
         Returns:
@@ -189,38 +207,39 @@ class Checkers(Game):
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 
         for i, (row, col) in enumerate(self.valid_squares):
-            if state[row, col] == player or state[row, col] == player * 2:
+            if self.logger.current_state[row, col] == player or self.logger.current_state[row, col] == player * 2:
                 for dr, dc in directions:
-                    if dr * player > 0 and state[row, col] != player * 2:
+                    if dr * player > 0 and self.logger.current_state[row, col] != player * 2:
                         continue
 
                     new_row = row + dr
                     new_col = col + dc
 
-                    if 0 <= new_row < self.row_count and 0 <= new_col < self.column_count and state[new_row, new_col] == 0:
+                    if (0 <= new_row < self.row_count and
+                            0 <= new_col < self.column_count and
+                            self.logger.current_state[new_row, new_col] == 0):
                         res.append(self.move_to_index[(i + 1, self.valid_squares.index((new_row, new_col)) + 1)])
         return res
 
-    def get_valid_moves(self, state, cur_player=1):
+    def get_valid_moves(self, cur_player=1):
         """
         Returns a list of valid moves that can be executed by a player (moves written in index format)
 
         Args:
-            state (np.array): 2d array of shape (rows, columns)
             cur_player (int): the index of the current player
 
         Returns:
             valid_moves (np.array(int)): list of valid moves in indexes
         """
         player = cur_player
-        valid_moves = self.get_capture_moves(state, player)
+        valid_moves = self._get_capture_moves(player)
 
-        if valid_moves == []:
-            valid_moves = self.get_normal_moves(state, player)
+        if not valid_moves:
+            valid_moves = self._get_normal_moves(player)
 
         return valid_moves
 
-    def get_opponent(self, player):
+    def _get_opponent(self, player):
         """
         Getting opponent index.
 
@@ -232,13 +251,12 @@ class Checkers(Game):
         """
         return -player
 
-    def get_next_player(self, state, action, player):
+    def get_next_player(self, action, player):
         """
         Returns the next player that will take the action.
         On the base of the last move.
 
         Args:
-            state (np.array): current game state
             action (int): the index of the last taken action
             player (int): the index of the player who took the action
 
@@ -246,13 +264,13 @@ class Checkers(Game):
             (int): index of the next player
         """
         cur_action = self.index_to_move[action]
-        next_player = self.get_opponent(player)
+        next_player = self._get_opponent(player)
 
         start_row, _ = self.valid_squares[cur_action[0] - 1]
         end_row, _ = self.valid_squares[cur_action[1] - 1]
 
         if abs(start_row - end_row) >= 2:
-            valid_moves = self.get_valid_moves(state, player)
+            valid_moves = self.get_valid_moves(player)
 
             for i in valid_moves:
                 start, end = self.index_to_move[i]
@@ -266,32 +284,34 @@ class Checkers(Game):
 
         return next_player
 
-    def check_win(self, state, player):
+    def _check_win(self, player):
         """
         Checks that opponent can make a move
 
         Args:
-            state (np.array): current game state
             player (int): the index of the player who took the last action
 
         Returns:
             boolean: True if the opponent can make a move
         """
-        opponent = self.get_opponent(player)
-        return len(self.get_valid_moves(state, opponent)) == 0
+        opponent = self._get_opponent(player)
+        return len(self.get_valid_moves(opponent)) == 0
 
-    def get_value_and_terminated(self, state, player):
+    def get_value_and_terminated(self, player):
         """
         Returns current value of the game and terminated or not is it.
 
         Args:
-            state (np.array): current game state
             player (int): the index of the player who took the action
 
         Returns:
             value (int): value of the game
             terminated (bool): terminated or not
         """
-        if self.check_win(state, player):
+        if self._check_win(player):
             return 1, True  # Player wins
+
+        if self.logger.additional_vars[0] >= 50:
+            return 0, True
+
         return 0, False

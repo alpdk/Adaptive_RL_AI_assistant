@@ -140,16 +140,15 @@ def main():
     score = {"win": 0, "loss": 0, "draw": 0}
 
     for i in tqdm(range(args.rounds_number)):
-        state = game.get_initial_state()
         cur_player = 1
 
         while True:
-            valid_moves = game.get_valid_moves(state, cur_player)
+            valid_moves = game.get_valid_moves(cur_player)
 
             if cur_player == 1:
-                policy, _ = model1(torch.tensor(game.get_encoded_state(state), device=model1.device).unsqueeze(0))
+                policy, _ = model1(torch.tensor(game.get_encoded_state(game.logger.current_state), device=model1.device).unsqueeze(0))
             else:
-                policy, _ = model2(torch.tensor(game.get_encoded_state(state), device=model2.device).unsqueeze(0))
+                policy, _ = model2(torch.tensor(game.get_encoded_state(game.logger.current_state), device=model2.device).unsqueeze(0))
 
             policy = torch.softmax(policy, axis=1).squeeze(0).cpu().detach().numpy()
 
@@ -162,11 +161,14 @@ def main():
             action = np.argmax(policy)
             played_action = game.index_to_move[action]
 
-            state = game.get_next_state(state, action, cur_player)
+            game.make_move(action, cur_player)
 
-            value, is_terminal = game.get_value_and_terminated(state, cur_player)
+            state = game.logger.current_state2
+
+            value, is_terminal = game.get_value_and_terminated(cur_player)
 
             if is_terminal:
+                state = game.logger.current_state
                 print("===============================================")
                 print(state)
                 print("===============================================")
@@ -180,9 +182,13 @@ def main():
                     score["draw"] += 1
 
                 game.not_capture_moves = 0
+
                 break
 
-            cur_player = game.get_next_player(state, action, cur_player)
+            cur_player = game.get_next_player(action, cur_player)
+
+        while game.logger.parent is not None:
+            game.revert_move()
 
     print(score)
 

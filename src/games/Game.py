@@ -15,6 +15,7 @@ class Game:
         move_to_index ({... -> int}): dictionary mapping move to index (move can be of any type)
         action_size (int): number of possible actions
         game_name (str): name of the game
+        logger (LoggerNode): logger node
     """
     row_count = None
     column_count = None
@@ -23,6 +24,7 @@ class Game:
     move_to_index = None
     action_size = None
     game_name = None
+    logger = None
 
     def get_moves_to_np_array(self, valid_moves):
         """
@@ -43,9 +45,6 @@ class Game:
         """
         Returns the encoded state of the game in a format of boards, where every board contain
         only 1 type of the figures.
-
-        Args:
-            state (np.array): 2d array of shape (rows, columns)
 
         Returns:
             np.array(): 3d array of shape (len(figures_kinds), rows, columns)
@@ -82,7 +81,7 @@ class Game:
         pass
 
     @abstractmethod
-    def get_initial_state(self):
+    def _get_initial_state(self):
         """
         Returns the initial state of the game's board
 
@@ -92,27 +91,32 @@ class Game:
         pass
 
     @abstractmethod
-    def get_next_state(self, state, action, player):
+    def make_move(self, action, player):
         """
         Generate a new state that will be reached, after making an action by players at current board
 
         Args:
-            state (np.array): 2d array of shape (rows, columns)
             action (int): the index of action to take
             player (int): the index of the player who takes the action
-
-        Returns:
-            np.array(): 2d array of shape (rows, columns)
         """
         pass
 
+    def revert_move(self):
+        """
+        Revert last move
+        """
+        self.logger = self.logger.parent
+
+        self.logger.child.parent = None
+        self.logger.child = None
+
+
     @abstractmethod
-    def get_valid_moves(self, state, cur_player=1):
+    def get_valid_moves(self, cur_player=1):
         """
         Returns a list of valid moves that can be executed by a player (moves written in index format)
 
         Args:
-            state (np.array): 2d array of shape (rows, columns)
             cur_player (int): the index of the current player
 
         Returns:
@@ -121,13 +125,12 @@ class Game:
         pass
 
     @abstractmethod
-    def get_next_player(self, state, action, player):
+    def get_next_player(self, action, player):
         """
         Returns the next player that will take the action.
         On the base of the last move.
 
         Args:
-            state (np.array): current game state
             action (int): the index of the last taken action
             player (int): the index of the player who took the action
 
@@ -137,12 +140,11 @@ class Game:
         pass
 
     @abstractmethod
-    def get_value_and_terminated(self, state, player):
+    def get_value_and_terminated(self, player):
         """
         Returns current value of the game and terminated or not is it.
 
         Args:
-            state (np.array): current game state
             player (int): the index of the player who took the action
 
         Returns:

@@ -50,20 +50,18 @@ class AlphaZero(AlgorithmsTemplate):
         """
         memory = []
         player = 1
-        state = self.game.get_initial_state()
 
         while True:
-            neutral_state = state.copy()
-            action_probs = self.mcts.search(neutral_state, player)
+            action_probs = self.mcts.search(player)
 
-            memory.append((neutral_state, action_probs, player))
+            memory.append((self.game.logger.current_state, action_probs, player))
 
             temperature_action_probs = action_probs ** (1 / self.args['temperature'])
             # action_probs = temperature_action_probs / np.sum(temperature_action_probs)
             action = np.random.choice(self.game.action_size, p=action_probs)
-            state = self.game.get_next_state(state, action, player)
+            self.game.make_move(action, player)
 
-            value, is_terminal = self.game.get_value_and_terminated(state, player)
+            value, is_terminal = self.game.get_value_and_terminated(player)
 
             if is_terminal:
                 returnMemory = []
@@ -77,7 +75,7 @@ class AlphaZero(AlgorithmsTemplate):
                     ))
                 return returnMemory
 
-            player = self.game.get_next_player(state, action, player)
+            player = self.game.get_next_player(action, player)
 
     def train(self, memory):
         """

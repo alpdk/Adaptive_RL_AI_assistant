@@ -9,7 +9,6 @@ class Node:
     Attributes:
          game (Game): The game that will be played.
          args ({}): Some arguments, that will be passed used.
-         state (np.array[]): The current state of the game.
          player (int): Player number, who's turn is now.
          parent (Node): The parent of this node.
          action_taken (int): Action taken by previous player.
@@ -18,10 +17,9 @@ class Node:
          value_sum (int): Value sum for this node.
     """
 
-    def __init__(self, game, args, state, player=0, parent=None, action_taken=None, visit_count=0):
+    def __init__(self, game, args, player=0, parent=None, action_taken=None, visit_count=0):
         self.game = game
         self.args = args
-        self.state = state
         self.player = player
         self.parent = parent
         self.action_taken = action_taken
@@ -92,12 +90,11 @@ class Node:
         """
         for action, prob in enumerate(policy):
             if prob > 0:
-                child_state = self.state.copy()
-                child_state = self.game.get_next_state(child_state, action, player)
+                self.game.make_move(action, player)
+                next_player = self.game.logger.current_player
+                self.game.revert_move()
 
-                next_player = self.game.get_next_player(child_state, action, player)
-
-                child = Node(self.game, self.args, child_state, next_player, self, action, prob)
+                child = Node(self.game, self.args, next_player, self, action, prob)
                 self.children.append(child)
 
     def backpropagate(self, value):
@@ -108,4 +105,5 @@ class Node:
         self.visit_count += 1
 
         if self.parent is not None:
+            self.game.revert_move()
             self.parent.backpropagate(value)
