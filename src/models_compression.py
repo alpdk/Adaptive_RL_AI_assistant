@@ -57,7 +57,7 @@ def load_game(name: str):
 
     match name:
         case "checkers":
-            return Checkers(8, 8)
+            return Checkers(4, 4)
         case _:
             return None
 
@@ -137,21 +137,19 @@ def main():
         print("Games cannot be played without both players!!!")
         return 1
 
-    cur_player_model = 1
-    cur_player = 1
-
     score = {"win": 0, "loss": 0, "draw": 0}
 
     for i in tqdm(range(args.rounds_number)):
         state = game.get_initial_state()
+        cur_player = 1
 
         while True:
             valid_moves = game.get_valid_moves(state, cur_player)
 
-            if cur_player_model == 1:
+            if cur_player == 1:
                 policy, _ = model1(torch.tensor(game.get_encoded_state(state), device=model1.device).unsqueeze(0))
             else:
-                policy, _ = model2(torch.tensor(game.get_encoded_state(state), device=model1.device).unsqueeze(0))
+                policy, _ = model2(torch.tensor(game.get_encoded_state(state), device=model2.device).unsqueeze(0))
 
             policy = torch.softmax(policy, axis=1).squeeze(0).cpu().detach().numpy()
 
@@ -159,6 +157,8 @@ def main():
             valid_moves_list[valid_moves] = True
 
             policy = policy * valid_moves_list
+            policy = policy / policy.sum()
+            # action = np.random.choice(game.action_size, p=policy)
             action = np.argmax(policy)
             played_action = game.index_to_move[action]
 
@@ -167,23 +167,22 @@ def main():
             value, is_terminal = game.get_value_and_terminated(state, cur_player)
 
             if is_terminal:
+                print("===============================================")
                 print(state)
+                print("===============================================")
 
                 if value == 1:
-                    if cur_player_model == 1:
+                    if cur_player == 1:
                         score["win"] += 1
                     else:
                         score["loss"] += 1
                 else:
-                    print("draw")
+                    score["draw"] += 1
+
+                game.not_capture_moves = 0
                 break
 
             cur_player = game.get_next_player(state, action, cur_player)
-
-            if cur_player == 1:
-                cur_player_model = 1
-            else:
-                cur_player_model = 2
 
     print(score)
 

@@ -248,15 +248,19 @@ class Checkers(Game):
         cur_action = self.index_to_move[action]
         next_player = self.get_opponent(player)
 
-        eat_step_size = (self.column_count // 2) * 2 - 1
+        start_row, _ = self.valid_squares[cur_action[0] - 1]
+        end_row, _ = self.valid_squares[cur_action[1] - 1]
 
-        if abs(cur_action[0] - cur_action[1]) >= eat_step_size:
+        if abs(start_row - end_row) >= 2:
             valid_moves = self.get_valid_moves(state, player)
 
             for i in valid_moves:
                 start, end = self.index_to_move[i]
 
-                if start == cur_action[1] and abs(start - end) >= eat_step_size:
+                start_row, _ = self.valid_squares[start - 1]
+                end_row, _ = self.valid_squares[end - 1]
+
+                if start == cur_action[1] and abs(start_row - end_row) >= 2:
                     next_player = player
                     break
 

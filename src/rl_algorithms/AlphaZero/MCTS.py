@@ -51,7 +51,7 @@ class MCTS:
             node = root
 
             while node.is_fully_expanded():
-                node = node.select()
+                node = node.select(player)
 
             last_move_player = node.parent.player
             value, is_terminal = self.game.get_value_and_terminated(node.state, last_move_player)
@@ -68,6 +68,9 @@ class MCTS:
                 value = value.item()
 
                 node.expand(policy, cur_player)
+
+            if player != last_move_player:
+                value = -value
 
             node.backpropagate(value)
 

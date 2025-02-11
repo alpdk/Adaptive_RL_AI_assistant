@@ -36,6 +36,10 @@ class AlgorithmsTemplate:
         file_type (string): file type of the weights
         iteration (string): iteration name, of the step
         """
+        dir_path = os.path.abspath(os.getcwd())
+
+        directory_to_save = os.path.join(dir_path, 'src/', directory_to_save)
+
         os.makedirs(directory_to_save, exist_ok=True)
 
         result_file_name = f"{whose_weights}_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}"
