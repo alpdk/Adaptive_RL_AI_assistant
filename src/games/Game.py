@@ -110,6 +110,13 @@ class Game:
         self.logger.child.parent = None
         self.logger.child = None
 
+    def revert_full_game(self):
+        """
+        Revert full game to the beggining
+        """
+        while self.logger.parent is not None:
+            self.revert_move()
+
 
     @abstractmethod
     def get_valid_moves(self, cur_player=1):

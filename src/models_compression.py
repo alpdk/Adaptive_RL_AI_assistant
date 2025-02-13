@@ -80,6 +80,8 @@ def load_model_structure(model_structure: str, game: Game, device: torch.device)
     match model_structure:
         case "resnet":
             return ResNet(game, 4, 64, device)
+        case _:
+            return None
 
 
 def load_model(device: torch.device,
@@ -111,6 +113,11 @@ def load_model(device: torch.device,
         return None
 
     model = load_model_structure(model_structure, game, device)
+
+    if model is None:
+        print(f"There are no such model structure: {model_structure}!!!")
+        return None
+
     model.load_state_dict(torch.load(path, weights_only=True))
 
     return model
@@ -134,7 +141,7 @@ def main():
     model2 = load_model(device, game, "external_weights", args.external_algorithm_name, args.external_model_structure)
 
     if model1 is None or model2 is None:
-        print("Games cannot be played without both players!!!")
+        print("Game cannot be played without both players!!!")
         return 1
 
     score = {"win": 0, "loss": 0, "draw": 0}
@@ -163,7 +170,7 @@ def main():
 
             game.make_move(action, cur_player)
 
-            state = game.logger.current_state2
+            state = game.logger.current_state
 
             value, is_terminal = game.get_value_and_terminated(cur_player)
 

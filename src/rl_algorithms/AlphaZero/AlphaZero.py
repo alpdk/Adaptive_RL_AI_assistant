@@ -56,7 +56,7 @@ class AlphaZero(AlgorithmsTemplate):
 
             memory.append((self.game.logger.current_state, action_probs, player))
 
-            temperature_action_probs = action_probs ** (1 / self.args['temperature'])
+            # temperature_action_probs = action_probs ** (1 / self.args['temperature'])
             # action_probs = temperature_action_probs / np.sum(temperature_action_probs)
             action = np.random.choice(self.game.action_size, p=action_probs)
             self.game.make_move(action, player)
@@ -73,6 +73,8 @@ class AlphaZero(AlgorithmsTemplate):
                         hist_action_probs,
                         hist_outcome
                     ))
+
+                self.game.revert_full_game()
                 return returnMemory
 
             player = self.game.get_next_player(action, player)
@@ -85,6 +87,8 @@ class AlphaZero(AlgorithmsTemplate):
             memory (np.array): memory of the games
         """
         random.shuffle(memory)
+
+        overall_mid_loss = 0
 
         for batchIdx in range(0, len(memory), self.args['batch_size']):
             sample = memory[batchIdx:min(len(memory) - 1, batchIdx + self.args['batch_size'])]
@@ -99,13 +103,16 @@ class AlphaZero(AlgorithmsTemplate):
             out_policy, out_value = self.model(state)
 
             policy_loss = F.cross_entropy(out_policy, policy_targets)
-            value_loss = F.mse_loss(out_value, value_targets)
+            value_loss = F.mse_loss(out_value, value_targets.view(-1, 1))
 
             loss = policy_loss + value_loss
+
+            overall_mid_loss = overall_mid_loss + loss
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+        print("Loss: ", overall_mid_loss / (len(memory) // self.args['batch_size'] + 1) )
 
     def learn(self):
         """
