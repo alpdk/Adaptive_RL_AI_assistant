@@ -9,10 +9,10 @@ from src.models_compression import load_model_structure, load_game
 
 train_args = {
     'C': 2,
-    'num_searches': 100,
     'num_iterations': 1,
-    'num_selfPlay_iterations': 1000,
-    'num_epochs': 100,
+    'num_searches': 200,
+    'num_selfPlay_iterations': 200,
+    'num_epochs': 50,
     'batch_size': 64,
     'temperature': 1.25,
     'dirichlet_epsilon': 0.25,
@@ -38,19 +38,6 @@ def parse_arguments():
                         help='Name of local trained model with specific algorithm weights')
 
     return parser.parse_args()
-
-# checkers = Checkers(4, 4)
-#
-# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-#
-# print(device)
-#
-# model = ResNet(checkers, 4, 64, device)
-#
-# optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
-#
-# alphaZero = AlphaZero(model, optimizer, checkers, args)
-# alphaZero.learn()
 
 def load_rl_algo(model, optimizer, game, rl_algorithm_name):
     rl_algorithm = rl_algorithm_name.lower()

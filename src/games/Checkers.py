@@ -19,6 +19,10 @@ class Checkers(Game):
         move_to_index ({... -> int}): dictionary mapping move to index (move can be of any type)
         action_size (int): number of possible actions
         game_name (str): name of the game
+        logger (LoggerNode): logger node with extra data (additional vars:
+                                                                0: amount of moves without capturing
+                                                                1: "kinged" or not last moved peace
+                                                                2: which piece was removed)
     """
 
     def __init__(self, row_count, column_count):

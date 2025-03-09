@@ -20,6 +20,58 @@ class MCTS:
         self.args = args
         self.model = model
 
+    def calc_probs(self, root):
+        """
+        Method for calculating the probabilities of each action
+
+        Parameters:
+             root(Node): root of the current game
+
+        Returns:
+            np.array[]: probabilities of each action
+        """
+        action_probs = np.zeros(self.game.action_size)
+        for child in root.children:
+            action = child.action_taken
+            action_probs[action] = child.visit_count
+        action_probs /= np.sum(action_probs)
+
+        return action_probs
+
+    # def calc_values(self, root):
+    #     """
+    #     Method for calculating the values of each action
+    #
+    #     Parameters:
+    #          root(Node): root of the current game
+    #
+    #     Returns:
+    #         np.array[]: values of each action
+    #     """
+    #     action_values = np.zeros(self.game.action_size)
+    #     for child in root.children:
+    #         action = child.action_taken
+    #         action_values[action] = child.value_sum
+    #
+    #     return action_values
+    #
+    # def calc_visits(self, root):
+    #     """
+    #     Method for calculating the amount visits of each action
+    #
+    #     Parameters:
+    #          root(Node): root of the current game
+    #
+    #     Returns:
+    #         np.array[]: visits of each action
+    #     """
+    #     action_visits = np.zeros(self.game.action_size)
+    #     for child in root.children:
+    #         action = child.action_taken
+    #         action_visits[action] = child.visit_count
+    #
+    #     return action_visits
+
     @torch.no_grad()
     def search(self, player):
         """
@@ -74,10 +126,8 @@ class MCTS:
 
             node.backpropagate(value)
 
+        action_probs = self.calc_probs(root)
+        # action_values = self.calc_values(root)
+        # action_visits = self.calc_visits(root)
 
-        action_probs = np.zeros(self.game.action_size)
-        for child in root.children:
-            action = child.action_taken
-            action_probs[action] = child.visit_count
-        action_probs /= np.sum(action_probs)
         return action_probs

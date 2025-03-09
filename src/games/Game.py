@@ -58,6 +58,61 @@ class Game:
 
         return encoded_state
 
+    def collect_opponent_moves(self, history_depth):
+        """
+        Method for collecting opponent moves.
+
+        Args:
+            history_depth (int): how many opponent moves to collect
+
+        Returns:
+             np.ndarray: opponent moves
+        """
+        current_player = self.logger.current_player
+
+        opponent_moves = np.empty(shape=(history_depth,), dtype=object)
+        logger_ref = self.logger
+
+        index = 0
+        logger_ref = logger_ref.parent
+
+        while index < self.history_depth and logger_ref is not None:
+            if current_player != logger_ref.current_player:
+                opponent_moves[index] = logger_ref
+                index += 1
+
+            logger_ref = logger_ref.parent
+
+        return opponent_moves
+
+    def get_some_history(self, history_depth):
+        """
+        Method for collecting input for model
+
+        Args:
+            history_depth (int): how many opponent moves to collect
+
+        Returns:
+            np_array(): encoded states hor last history_depth steps of an opponent
+        """
+
+        opponent_moves = self.collect_opponent_moves()
+
+        new_input = np.empty(shape=(history_depth + 1, ), dtype=object)
+
+        new_input[0] = self.get_encoded_state(self.logger.current_state)
+
+        for i in range(history_depth):
+            if opponent_moves[i] is None:
+                new_input[i + 1] = self.get_encoded_state(np.zeros(shape=self.logger.current_state.shape, dtype=int))
+            else:
+                new_input[i + 1] = self.get_encoded_state(opponent_moves[i].current_state)
+
+        res = np.stack(new_input)
+        res = res.reshape(-1, self.row_count, self.column_count)
+        return res
+
+
     @abstractmethod
     def _get_figures_kinds(self):
         """

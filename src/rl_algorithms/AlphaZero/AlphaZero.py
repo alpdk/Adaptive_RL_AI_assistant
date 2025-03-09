@@ -1,4 +1,3 @@
-import os
 import random
 import numpy as np
 
@@ -30,9 +29,9 @@ class AlphaZero(AlgorithmsTemplate):
 
         Args:
             model (nn.Module): model that will be used for training in algorithm
-        optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
-        game (Game): game that will be used for training in algorithm
-        args ({}): arguments that will be passed to the algorithm
+            optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
+            game (Game): game that will be used for training in algorithm
+            args ({}): arguments that will be passed to the algorithm
         """
         self.model = model
         self.optimizer = optimizer
@@ -100,6 +99,7 @@ class AlphaZero(AlgorithmsTemplate):
             policy_targets = torch.tensor(policy_targets, dtype=torch.float32, device=self.model.device)
             value_targets = torch.tensor(value_targets, dtype=torch.float32, device=self.model.device)
 
+            # out_policy, out_value = self.model(state)
             out_policy, out_value = self.model(state)
 
             policy_loss = F.cross_entropy(out_policy, policy_targets)
