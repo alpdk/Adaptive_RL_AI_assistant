@@ -1,5 +1,4 @@
 import os
-import sys
 import torch
 import argparse
 
@@ -7,7 +6,7 @@ from tqdm import tqdm
 import numpy as np
 
 from games.Game import Game
-from models_structures.ResNet import ResNet
+from src.models_structures.base_play.ResNet import ResNet
 from src.games.Checkers import Checkers
 
 

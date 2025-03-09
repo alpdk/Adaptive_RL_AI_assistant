@@ -1,8 +1,6 @@
 import torch
 import argparse
 
-from games.Checkers import Checkers
-from src.models_structures.ResNet import ResNet
 from src.rl_algorithms.AlphaZero.AlphaZero import AlphaZero
 
 from src.models_compression import load_model_structure, load_game
