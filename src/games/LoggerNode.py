@@ -13,6 +13,9 @@ class LoggerNode:
         additional_vars (np.array[]): Additional variables that required for games.
         parent (LoggerNode): The parent of this node.
         child (LoggerNode): The child of this node.
+
+        action_probs (np.array): action probabilities.
+        action_values (np.array): action values.
     """
 
     def __init__(self, current_state=None, current_player=1, last_action=-1, additional_vars=np.array([], dtype=object),
@@ -35,6 +38,9 @@ class LoggerNode:
         self.parent = parent
         self.child = child
 
+        self.action_probs = None
+        self.action_values = None
+
     def delete_child(self):
         """
         Node for deleting a child of this node.
@@ -42,3 +48,7 @@ class LoggerNode:
         if self.child:
             self.child.parent = None
             self.child.child = None
+
+    def set_action_probs_and_values(self, action_probs, action_values):
+        self.action_probs = action_probs
+        self.action_values = action_values

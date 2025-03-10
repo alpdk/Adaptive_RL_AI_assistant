@@ -9,16 +9,16 @@ class Checkers(Game):
     Implementation of a Checkers game with parent class GAME
 
     Attributes:
-        row_count (int): count of rows in the game
-        column_count (int): count of columns in the game
+        row_count (int): count of rows in the game.
+        column_count (int): count of columns in the game.
         figures_kinds ([int]): a list of possible figure kinds in integer format
                                (same figures for different players should have different numbers)
 
-        self.valid_squares ([int]) : a list of squares that the game is valid for
+        self.valid_squares ([int]) : a list of squares that the game is valid for.
         index_to_move ({int -> ...}): dictionary mapping index to move (move can be of any type)
         move_to_index ({... -> int}): dictionary mapping move to index (move can be of any type)
-        action_size (int): number of possible actions
-        game_name (str): name of the game
+        action_size (int): number of possible actions.
+        game_name (str): name of the game.
         logger (LoggerNode): logger node with extra data (additional vars:
                                                                 0: amount of moves without capturing
                                                                 1: "kinged" or not last moved peace
@@ -27,7 +27,7 @@ class Checkers(Game):
 
     def __init__(self, row_count, column_count):
         """
-        Constructor
+        Constructor.
         """
         self.row_count = row_count
         self.column_count = column_count
@@ -52,7 +52,7 @@ class Checkers(Game):
         -2, 2 - "kinged" checker
 
         Returns:
-            [int]: List of possible figures in integer format
+            [int]: List of possible figures in integer format.
         """
         return [-2, -1, 0, 1, 2]
 
@@ -84,10 +84,10 @@ class Checkers(Game):
 
     def _get_valid_squares(self):
         """
-        Returns a list of valid squares (dark squares) on an row_count X column_count board
+        Returns a list of valid squares (dark squares) on a row_count X column_count board.
 
         Returns:
-            list(int): List of valid squares on board
+            list(int): List of valid squares on board.
         """
         valid_squares = []
         for row in range(self.row_count):
@@ -99,10 +99,10 @@ class Checkers(Game):
 
     def _get_initial_state(self):
         """
-        Returns the initial state of the game's board
+        Returns the initial state of the game's board.
 
         Returns:
-            np.array(): 2d array of shape (rows, columns) with initial state of figures
+            np.array(): 2d array of shape (rows, columns) with initial state of figures.
         """
         state = np.zeros((self.row_count, self.column_count))
 
@@ -117,11 +117,11 @@ class Checkers(Game):
 
     def make_move(self, action, player):
         """
-        Generate a new state that will be reached, after making an action by players at current board
+        Generate a new state that will be reached, after making an action by players at current board.
 
         Args:
-            action (int): the index of action to take
-            player (int): the index of the player who takes the action
+            action (int): the index of action to take.
+            player (int): the index of the player who takes the action.
         """
         new_game_log = LoggerNode()
         new_game_log.last_action = action
@@ -164,13 +164,13 @@ class Checkers(Game):
 
     def _get_capture_moves(self, player):
         """
-        Getting a capture moves for a given state by a given player
+        Getting a capture moves for a given state by a given player.
 
         Args:
-            player (int): the index of the player who takes the action
+            player (int): the index of the player who takes the action.
 
         Returns:
-            list(int): list of capture moves in index format that can be made
+            list(int): list of capture moves in index format that can be made.
         """
         res = []
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
@@ -199,13 +199,13 @@ class Checkers(Game):
 
     def _get_normal_moves(self, player):
         """
-        Getting a normal moves for a given state by a given player
+        Getting a normal moves for a given state by a given player.
 
         Args:
-            player (int): the index of the player who takes the action
+            player (int): the index of the player who takes the action.
 
         Returns:
-            list(int): list of normal moves in index format that can be made
+            list(int): list of normal moves in index format that can be made.
         """
         res = []
         directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
@@ -230,10 +230,10 @@ class Checkers(Game):
         Returns a list of valid moves that can be executed by a player (moves written in index format)
 
         Args:
-            cur_player (int): the index of the current player
+            cur_player (int): the index of the current player.
 
         Returns:
-            valid_moves (np.array(int)): list of valid moves in indexes
+            valid_moves (np.array(int)): list of valid moves in indexes.
         """
         player = cur_player
         valid_moves = self._get_capture_moves(player)
@@ -248,10 +248,10 @@ class Checkers(Game):
         Getting opponent index.
 
         Args:
-            player (int): the index of the player
+            player (int): the index of the player.
 
         Returns:
-            (int): the index of the opponent
+            (int): the index of the opponent.
         """
         return -player
 
@@ -261,11 +261,11 @@ class Checkers(Game):
         On the base of the last move.
 
         Args:
-            action (int): the index of the last taken action
-            player (int): the index of the player who took the action
+            action (int): the index of the last taken action.
+            player (int): the index of the player who took the action.
 
         Returns:
-            (int): index of the next player
+            (int): index of the next player.
         """
         cur_action = self.index_to_move[action]
         next_player = self._get_opponent(player)
@@ -290,13 +290,13 @@ class Checkers(Game):
 
     def _check_win(self, player):
         """
-        Checks that opponent can make a move
+        Checks that opponent can make a move.
 
         Args:
-            player (int): the index of the player who took the last action
+            player (int): the index of the player who took the last action.
 
         Returns:
-            boolean: True if the opponent can make a move
+            boolean: True if the opponent can make a move.
         """
         opponent = self._get_opponent(player)
         return len(self.get_valid_moves(opponent)) == 0
@@ -306,11 +306,11 @@ class Checkers(Game):
         Returns current value of the game and terminated or not is it.
 
         Args:
-            player (int): the index of the player who took the action
+            player (int): the index of the player who took the action.
 
         Returns:
-            value (int): value of the game
-            terminated (bool): terminated or not
+            value (int): value of the game.
+            terminated (bool): terminated or not.
         """
         if self._check_win(player):
             return 1, True  # Player wins

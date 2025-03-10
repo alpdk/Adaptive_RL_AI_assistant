@@ -12,14 +12,14 @@ class AlgorithmsTemplate:
     This is a parent class, for algorithms
 
     Attributes:
-        base_model (nn.Module): model that will be used for training in algorithm
+        model (nn.Module): model that will be used for training in algorithm
         optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
         game (Game): game that will be used for training in algorithm
         args ({}): arguments that will be passed to the algorithm
         algorithm_name (str): name of the algorithm
     """
 
-    base_model = None
+    model = None
     optimizer = None
     game = None
     args = None
@@ -42,7 +42,7 @@ class AlgorithmsTemplate:
 
         os.makedirs(directory_to_save, exist_ok=True)
 
-        result_file_name = f"{whose_weights}_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.base_model.structure_name.lower()}"
+        result_file_name = f"{whose_weights}_{self.game.game_name.lower()}_{self.algorithm_name.lower()}_{self.model.structure_name.lower()}"
 
         if iteration is not None:
             result_file_name = result_file_name + f"_{iteration}"

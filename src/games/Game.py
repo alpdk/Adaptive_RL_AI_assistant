@@ -121,7 +121,7 @@ class Game:
         Empty spot also classified as a figure.
 
         Returns:
-            [int]: List of possible figures in integer format
+            [int]: List of possible figures in integer format.
         """
         pass
 
@@ -138,27 +138,27 @@ class Game:
     @abstractmethod
     def _get_initial_state(self):
         """
-        Returns the initial state of the game's board
+        Returns the initial state of the game's board.
 
         Returns:
-            np.array(): 2d array of shape (rows, columns) with initial state of figures
+            np.array(): 2d array of shape (rows, columns) with initial state of figures.
         """
         pass
 
     @abstractmethod
     def make_move(self, action, player):
         """
-        Generate a new state that will be reached, after making an action by players at current board
+        Generate a new state that will be reached, after making an action by players at current board.
 
         Args:
-            action (int): the index of action to take
-            player (int): the index of the player who takes the action
+            action (int): the index of action to take.
+            player (int): the index of the player who takes the action.
         """
         pass
 
     def revert_move(self):
         """
-        Revert last move
+        Revert last move.
         """
         self.logger = self.logger.parent
 
@@ -167,7 +167,7 @@ class Game:
 
     def revert_full_game(self):
         """
-        Revert full game to the beggining
+        Revert full game to the beginning.
         """
         while self.logger.parent is not None:
             self.revert_move()
@@ -179,10 +179,10 @@ class Game:
         Returns a list of valid moves that can be executed by a player (moves written in index format)
 
         Args:
-            cur_player (int): the index of the current player
+            cur_player (int): the index of the current player.
 
         Returns:
-            valid_moves (np.array(int)): list of valid moves in indexes
+            valid_moves (np.array(int)): list of valid moves in indexes.
         """
         pass
 
@@ -193,8 +193,8 @@ class Game:
         On the base of the last move.
 
         Args:
-            action (int): the index of the last taken action
-            player (int): the index of the player who took the action
+            action (int): the index of the last taken action.
+            player (int): the index of the player who took the action.
 
         Returns:
             (int): index of the next player
@@ -207,10 +207,10 @@ class Game:
         Returns current value of the game and terminated or not is it.
 
         Args:
-            player (int): the index of the player who took the action
+            player (int): the index of the player who took the action.
 
         Returns:
-            value (int): value of the game
-            terminated (bool): terminated or not
+            value (int): value of the game.
+            terminated (bool): terminated or not.
         """
         pass
