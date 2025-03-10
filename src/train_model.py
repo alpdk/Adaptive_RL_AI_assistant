@@ -32,7 +32,7 @@ def parse_arguments():
     parser.add_argument('model_structure_name', type=str,
                         help='Local model structure that will be used')
 
-    parser.add_argument('rj_algorithm_name', type=str,
+    parser.add_argument('rl_algorithm_name', type=str,
                         help='Name of local trained model with specific algorithm weights')
 
     return parser.parse_args()
@@ -48,8 +48,8 @@ def load_rl_algo(model, optimizer, game, rl_algorithm_name):
 
 def main():
     """
-        Main function for Compression of models
-        """
+    Main function for training base model
+    """
     args = parse_arguments()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -68,10 +68,10 @@ def main():
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
 
-    rl_algo = load_rl_algo(model, optimizer, game, args.rj_algorithm_name)
+    rl_algo = load_rl_algo(model, optimizer, game, args.rl_algorithm_name)
 
     if rl_algo is None:
-        print(f"There is no such algorithm: {args.rj_algorithm_name}!!!")
+        print(f"There is no such algorithm: {args.rl_algorithm_name}!!!")
         return 1
 
     rl_algo.learn()

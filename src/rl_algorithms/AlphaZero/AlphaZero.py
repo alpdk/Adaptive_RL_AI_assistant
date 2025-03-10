@@ -15,7 +15,7 @@ class AlphaZero(AlgorithmsTemplate):
     This class provide a function that implements the AlphaZero algorithm.
 
     Attributes:
-        model (nn.Module): model that will be used for training in algorithm
+        base_model (nn.Module): model that will be used for training in algorithm
         optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
         game (Game): game that will be used for training in algorithm
         args ({}): arguments that will be passed to the algorithm
@@ -23,21 +23,21 @@ class AlphaZero(AlgorithmsTemplate):
         algorithm_name (str): name of the algorithm
     """
 
-    def __init__(self, model, optimizer, game, args):
+    def __init__(self, base_model, optimizer, game, args):
         """
         Constructor for initializing the AlphaZero class
 
         Args:
-            model (nn.Module): model that will be used for training in algorithm
+            base_model (nn.Module): model that will be used for training in algorithm
             optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
             game (Game): game that will be used for training in algorithm
             args ({}): arguments that will be passed to the algorithm
         """
-        self.model = model
+        self.base_model = base_model
         self.optimizer = optimizer
         self.game = game
         self.args = args
-        self.mcts = MCTS(game, args, model)
+        self.mcts = MCTS(game, args, base_model)
         self.algorithm_name = "AlphaZero"
 
     def selfPlay(self):
@@ -95,12 +95,12 @@ class AlphaZero(AlgorithmsTemplate):
 
             state, policy_targets, value_targets = np.array(state), np.array(policy_targets), np.array(value_targets)
 
-            state = torch.tensor(state, dtype=torch.float32, device=self.model.device)
-            policy_targets = torch.tensor(policy_targets, dtype=torch.float32, device=self.model.device)
-            value_targets = torch.tensor(value_targets, dtype=torch.float32, device=self.model.device)
+            state = torch.tensor(state, dtype=torch.float32, device=self.base_model.device)
+            policy_targets = torch.tensor(policy_targets, dtype=torch.float32, device=self.base_model.device)
+            value_targets = torch.tensor(value_targets, dtype=torch.float32, device=self.base_model.device)
 
             # out_policy, out_value = self.model(state)
-            out_policy, out_value = self.model(state)
+            out_policy, out_value = self.base_model(state)
 
             policy_loss = F.cross_entropy(out_policy, policy_targets)
             value_loss = F.mse_loss(out_value, value_targets.view(-1, 1))
@@ -128,18 +128,18 @@ class AlphaZero(AlgorithmsTemplate):
         for iteration in trange(self.args['num_iterations']):
             memory = []
 
-            self.model.eval()
+            self.base_model.eval()
 
             for selfPlay_iteration in trange(self.args['num_selfPlay_iterations']):
                 memory += self.selfPlay()
 
-            self.model.train()
+            self.base_model.train()
 
             for epoch in trange(self.args['num_epochs']):
                 self.train(memory)
 
-            self.save_weights(self.model.state_dict(), model_dir, "model", "pth", iteration)
+            self.save_weights(self.base_model.state_dict(), model_dir, "model", "pth", iteration)
             self.save_weights(self.optimizer.state_dict(), optimizer_dir, "optimizer", "pt", iteration)
 
-        self.save_weights(self.model.state_dict(), model_dir, "model", "pth")
+        self.save_weights(self.base_model.state_dict(), model_dir, "model", "pth")
         self.save_weights(self.optimizer.state_dict(), optimizer_dir, "optimizer", "pt")
