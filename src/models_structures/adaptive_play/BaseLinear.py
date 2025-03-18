@@ -37,9 +37,9 @@ class BaseLinear(nn.Module):
         )
 
         self.finalBlock = nn.Sequential(
-            nn.Linear((game.action_size + 1), num_hidden),
-            nn.BatchNorm1d(num_hidden),
-            nn.Softmax(dim=1)
+            nn.Linear(num_hidden, game.action_size),
+            nn.BatchNorm1d(game.action_size)
+            # nn.Softmax(dim=1)
         )
 
         self.to(device)
@@ -80,7 +80,7 @@ class LinearBlock(nn.Module):
 
         self.layer = nn.Sequential(
             nn.Linear(num_hidden, num_hidden),
-            nn.BatchNorm1d(num_hidden),
+            # nn.BatchNorm1d(num_hidden),
             nn.ReLU()
         )
 
@@ -96,7 +96,7 @@ class LinearBlock(nn.Module):
         """
         residual = x
         x = self.layer(x)
-        x += residual
+        x = x + residual
         x = F.relu(x)
         return x
 

@@ -13,33 +13,13 @@ class AdaptTrainer(TrainerTemplate):
     This class provide code for adaptability training for models
 
     Attributes:
-        adapt_prob (AdaptProbsTemplate): class for adapting action probs
         base_model (nn.Module): model that will be used for training in algorithm
         adapt_model (nn.Module): model that will adapt to opponent's level
         optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
         game (Game): game that will be used for training in algorithm
+        algorithm (): algorithm, that will be used in training
         args ({}): arguments that will be passed to the algorithm
-        algorithm_name (str): name of the algorithm
     """
-
-    def __init__(self, adapt_prob, base_model, adapt_model, optimizer, game, args):
-        """
-        Constructor.
-
-        Args:
-             adapt_prob (AdaptProbsTemplate): class for adapting action probs
-             base_model (nn.Module): model that will be used for training in algorithm
-             adapt_model (nn.Module): model that will adapt to opponent's level
-             optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
-             game (Game): game that will be used for training in algorithm
-             args ({}): arguments that will be passed to the algorithm'
-        """
-        self.adapt_prob = adapt_prob
-        self.base_model = base_model
-        self.adapt_model = adapt_model
-        self.optimizer = optimizer
-        self.game = game
-        self.args = args
 
     def selfPlay(self):
         """
@@ -71,7 +51,7 @@ class AdaptTrainer(TrainerTemplate):
 
             # temperature_action_probs = action_probs ** (1 / self.args['temperature'])
             # action_probs = temperature_action_probs / np.sum(temperature_action_probs)
-            median_opponent_income, new_action_probs = self.adapt_prob.probs_modification()
+            median_opponent_income, new_action_probs = self.algorithm.probs_modification()
 
             # new_action_probs = F.softmax(new_action_probs)
             # median_opponent_income = torch.squeeze(median_opponent_income, dim=0).cpu().detach().numpy()

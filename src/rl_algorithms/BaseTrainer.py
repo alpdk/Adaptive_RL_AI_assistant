@@ -23,25 +23,6 @@ class BaseTrainer(TrainerTemplate):
         args ({}): arguments that will be passed to the algorithm
     """
 
-    def __init__(self, base_model, adapt_model, optimizer, game, algorithm, args):
-        """
-        Constructor for initializing the AlphaZero class
-
-        Args:
-            base_model (nn.Module): model that will be used for training in algorithm
-            adapt_model (nn.Module): model layers for weights adaptation
-            optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
-            game (Game): game that will be used for training in algorithm
-            algorithm (BaseProbsTemplate): RL algorithm that will be used for training
-            args ({}): arguments that will be passed to the algorithm
-        """
-        self.base_model = base_model
-        self.adapt_model = adapt_model
-        self.optimizer = optimizer
-        self.game = game
-        self.algorithm = algorithm
-        self.args = args
-
     def selfPlay(self):
         """
         Algorithm of playing game, until will be reached a terminal state of the game

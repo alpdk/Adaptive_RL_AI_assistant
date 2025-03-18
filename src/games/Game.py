@@ -35,7 +35,7 @@ class Game:
             valid_moves (np.array(int)): list of valid moves in indexes
 
         Returns:
-            np.array(): array with a length of all actions
+            res (np.array()): array with a length of all actions
         """
         res = np.zeros(self.action_size, dtype=int)
         res[valid_moves] = 1
@@ -47,7 +47,7 @@ class Game:
         only 1 type of the figures.
 
         Returns:
-            np.array(): 3d array of shape (len(figures_kinds), rows, columns)
+            encoded_state (np.array()): 3d array of shape (len(figures_kinds), rows, columns)
         """
         encoded_state = np.stack(
             [state == condition for condition in self.figures_kinds]
@@ -60,13 +60,13 @@ class Game:
 
     def collect_opponent_moves(self, history_depth):
         """
-        Method for collecting opponent moves.
+        Method for collecting opponent moves
 
         Args:
             history_depth (int): how many opponent moves to collect
 
         Returns:
-             np.ndarray: opponent moves
+             opponent_moves (np.ndarray): opponent moves
         """
         current_player = self.logger.current_player
 
@@ -76,7 +76,7 @@ class Game:
         index = 0
         logger_ref = logger_ref.parent
 
-        while index < self.history_depth and logger_ref is not None:
+        while index < history_depth and logger_ref is not None:
             if current_player != logger_ref.current_player:
                 opponent_moves[index] = logger_ref
                 index += 1
@@ -93,7 +93,7 @@ class Game:
             history_depth (int): how many opponent moves to collect
 
         Returns:
-            np_array(): encoded states hor last history_depth steps of an opponent
+            res (np_array()): encoded states hor last history_depth steps of an opponent
         """
 
         opponent_moves = self.collect_opponent_moves()
@@ -116,12 +116,12 @@ class Game:
     @abstractmethod
     def _get_figures_kinds(self):
         """
-        Returns a list of possible figure kinds in integer format.
-        You should create your own bijection between numbers and figures.
-        Empty spot also classified as a figure.
+        Returns a list of possible figure kinds in integer format
+        You should create your own bijection between numbers and figures
+        Empty spot also classified as a figure
 
         Returns:
-            [int]: List of possible figures in integer format.
+            [int]: List of possible figures in integer format
         """
         pass
 
@@ -138,21 +138,21 @@ class Game:
     @abstractmethod
     def _get_initial_state(self):
         """
-        Returns the initial state of the game's board.
+        Returns the initial state of the game's board
 
         Returns:
-            np.array(): 2d array of shape (rows, columns) with initial state of figures.
+            np.array(): 2d array of shape (rows, columns) with initial state of figures
         """
         pass
 
     @abstractmethod
     def make_move(self, action, player):
         """
-        Generate a new state that will be reached, after making an action by players at current board.
+        Generate a new state that will be reached, after making an action by players at current board
 
         Args:
-            action (int): the index of action to take.
-            player (int): the index of the player who takes the action.
+            action (int): the index of action to take
+            player (int): the index of the player who takes the action
         """
         pass
 
@@ -167,7 +167,7 @@ class Game:
 
     def revert_full_game(self):
         """
-        Revert full game to the beginning.
+        Revert full game to the beginning
         """
         while self.logger.parent is not None:
             self.revert_move()
@@ -179,22 +179,22 @@ class Game:
         Returns a list of valid moves that can be executed by a player (moves written in index format)
 
         Args:
-            cur_player (int): the index of the current player.
+            cur_player (int): the index of the current player
 
         Returns:
-            valid_moves (np.array(int)): list of valid moves in indexes.
+            valid_moves (np.array(int)): list of valid moves in indexes
         """
         pass
 
     @abstractmethod
     def get_next_player(self, action, player):
         """
-        Returns the next player that will take the action.
-        On the base of the last move.
+        Returns the next player that will take the action
+        On the base of the last move
 
         Args:
-            action (int): the index of the last taken action.
-            player (int): the index of the player who took the action.
+            action (int): the index of the last taken action
+            player (int): the index of the player who took the action
 
         Returns:
             (int): index of the next player
@@ -204,13 +204,13 @@ class Game:
     @abstractmethod
     def get_value_and_terminated(self, player):
         """
-        Returns current value of the game and terminated or not is it.
+        Returns current value of the game and terminated or not is it
 
         Args:
-            player (int): the index of the player who took the action.
+            player (int): the index of the player who took the action
 
         Returns:
-            value (int): value of the game.
-            terminated (bool): terminated or not.
+            value (int): value of the game
+            terminated (bool): terminated or not
         """
         pass

@@ -8,8 +8,9 @@ class ResNet(nn.Module):
     Attributes:
         device (): Device that the model will be trained on
         startBlock (nn.Sequential): first block of the model
-        backBone (nn.Sequential): backbone of the model constructed from ResBlocks
+        backBone1 (nn.Sequential): backbone of the model constructed from ResBlocks
         policyHead (nn.Sequential): policy head of the model
+        movesValueHead (nn.Sequential): moves value head of the model
         valueHead (nn.Sequential): value head of the model
         structure_name (string): name of the model structure
     """
@@ -32,11 +33,25 @@ class ResNet(nn.Module):
             nn.ReLU()
         )
 
-        self.backBone = nn.ModuleList(
+        self.backBone1 = nn.ModuleList(
             [ResBlock(num_hidden) for i in range(num_resBlocks)]
         )
 
         self.policyHead = nn.Sequential(
+            nn.Conv2d(num_hidden, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(32 * game.row_count * game.column_count, game.action_size)
+        )
+
+        self.movesValueHead = nn.Sequential(
+            nn.Conv2d(num_hidden, num_hidden, kernel_size=3, padding=1),
+            nn.BatchNorm2d(num_hidden),
+            nn.ReLU(),
+            nn.Conv2d(num_hidden, num_hidden, kernel_size=3, padding=1),
+            nn.BatchNorm2d(num_hidden),
+            nn.ReLU(),
             nn.Conv2d(num_hidden, 32, kernel_size=3, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
@@ -66,14 +81,16 @@ class ResNet(nn.Module):
 
         Returns:
             policy (np.array[]): policy of moves from current state.
+            move_values (np.array[]): moves value from current state.
             value (int): value from current state.
         """
         x = self.startBlock(x)
-        for resBlock in self.backBone:
+        for resBlock in self.backBone1:
             x = resBlock(x)
         policy = self.policyHead(x)
+        move_values = self.movesValueHead(x)
         value = self.valueHead(x)
-        return policy, value
+        return policy, move_values, value
 
 
 class ResBlock(nn.Module):
@@ -116,6 +133,6 @@ class ResBlock(nn.Module):
         residual = x
         x = F.relu(self.layer1(x))
         x = self.layer2(x)
-        x += residual
+        x = x + residual
         x = F.relu(x)
         return x

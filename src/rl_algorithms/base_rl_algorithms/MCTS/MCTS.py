@@ -40,7 +40,7 @@ class MCTS(BaseProbsTemplate):
         root = Node(self.game, self.args, player, None, None, visit_count = 1)
 
         policy, _, value = self.model(torch.tensor(self.game.get_encoded_state(self.game.logger.current_state), device=self.model.device).unsqueeze(0))
-        policy = torch.softmax(policy, axis=1).squeeze(0).cpu().numpy()
+        policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
 
         policy = (1 - self.args['dirichlet_epsilon']) * policy + np.random.dirichlet([self.args['dirichlet_alpha']] * self.game.action_size) * self.args['dirichlet_epsilon']
 

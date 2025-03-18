@@ -1,23 +1,20 @@
-import torch
-import argparse
-
-from src.rl_algorithms.AlphaZero.AlphaZero import AlphaZero
-
-from src.models_compression import load_model_structure, load_game
+from src.external_methods_and_arguments import *
 
 train_args = {
     'C': 2,
-    'num_iterations': 1,
+    'num_iterations': 3,
     'num_searches': 200,
     'num_selfPlay_iterations': 200,
-    'num_epochs': 50,
+    'num_epochs': 200,
     'batch_size': 64,
     'temperature': 1.25,
     'dirichlet_epsilon': 0.25,
-    'dirichlet_alpha': 0.3
+    'dirichlet_alpha': 0.3,
+    'history_depth': 5,
+    'relevance_coef': 1.0
 }
 
-def parse_arguments():
+def parse_base_model_arguments():
     """
     Parse command line arguments
 
@@ -37,20 +34,11 @@ def parse_arguments():
 
     return parser.parse_args()
 
-def load_rl_algo(model, optimizer, game, rl_algorithm_name):
-    rl_algorithm = rl_algorithm_name.lower()
-
-    match rl_algorithm:
-        case 'alphazero':
-            return AlphaZero(model, optimizer, game, train_args)
-        case _:
-            return None
-
 def main():
     """
     Main function for training base model
     """
-    args = parse_arguments()
+    args = parse_base_model_arguments()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -66,15 +54,17 @@ def main():
         print("Cannot work without a model!!!")
         return 1
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0001)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.0001)
 
-    rl_algo = load_rl_algo(model, optimizer, game, args.rl_algorithm_name)
+    rl_algorithm = load_rl_algorithm(args.rl_algorithm_name, game, train_args, model)
 
-    if rl_algo is None:
+    trainer = load_trainer("BaseTrainer", rl_algorithm, model, None, optimizer, game, train_args)
+
+    if trainer is None:
         print(f"There is no such algorithm: {args.rl_algorithm_name}!!!")
         return 1
 
-    rl_algo.learn()
+    trainer.learn()
 
 
 if __name__ == '__main__':

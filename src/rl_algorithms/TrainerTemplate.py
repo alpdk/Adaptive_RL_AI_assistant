@@ -20,12 +20,24 @@ class TrainerTemplate:
         args ({}): arguments that will be passed to the algorithm
     """
 
-    base_model = None
-    adapt_model = None
-    optimizer = None
-    game = None
-    algorithm = None
-    args = None
+    def __init__(self, algorithm, base_model, adapt_model, optimizer, game, args):
+        """
+        Constructor for initializing the AlphaZero class
+
+        Args:
+            algorithm (): algorithm that will be used for training
+            base_model (nn.Module): model that will be used for training in algorithm
+            adapt_model (nn.Module): model layers for weights adaptation
+            optimizer (torch.optim.Optimizer): optimizer that will be used for training in algorithm
+            game (Game): game that will be used for training in algorithm
+            args ({}): arguments that will be passed to the algorithm
+        """
+        self.algorithm = algorithm
+        self.base_model = base_model
+        self.adapt_model = adapt_model
+        self.optimizer = optimizer
+        self.game = game
+        self.args = args
 
     def save_weights(self, state_dict, directory_to_save, whose_weights, file_type, iteration=None):
         """
