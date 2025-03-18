@@ -15,14 +15,19 @@ class BaseProbsTemplate:
         model (nn.Module): the model that will be trained.
         algorithm_name (str): name of the algorithm.
     """
-    def __init__(self, game, args, model, algorithm_name):
+    def __init__(self, game, args, model):
         """
         Constructor.
+
+        Parameters:
+            game (Game): Game that will be played.
+            args ({}): some arguments that will be passed to the RL algorithm.
+            model (nn.Module): the model that will be trained.
         """
         self.game = game
         self.args = args
         self.model = model
-        self.algorithm_name = algorithm_name
+        self.algorithm_name = None
 
     def calc_probs(self, root):
         """

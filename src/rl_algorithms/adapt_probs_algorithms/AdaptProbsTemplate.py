@@ -8,23 +8,22 @@ class AdaptProbsTemplate:
         game (Game): game, that is played with history
         history_depth (int): how many steps, will be chosen for current one
         algorithm_name (str): name of the algorithm.
-        extra_args ({}}): dictionary of additional args
+        extra_data ({}): dictionary of additional args
     """
 
-    def __init__(self, game, history_depth, algorithm_name, extra_args=None):
+    def __init__(self, game, history_depth, extra_data=None):
         """
         Constructor.
 
         Parameters:
             game (Game): game, that is played with history
             history_depth (int): how many steps, will be chosen for current one
-            algorithm_name (str): name of the algorithm
-            extra_args ({}}): dictionary of additional args
+            extra_data ({}): dictionary of additional args
         """
         self.game = game
         self.history_depth = history_depth
-        self.algorithm_name = algorithm_name
-        self.extra_args = extra_args
+        self.algorithm_name = None
+        self.extra_data = extra_data
 
     @abstractmethod
     def calc_player_income(self, opponent_moves):

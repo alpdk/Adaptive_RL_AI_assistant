@@ -13,12 +13,25 @@ class AdaptProbs(AdaptProbsTemplate):
         game (Game): game, that is played with history
         history_depth (int): how many steps, will be chosen for current one
         algorithm_name (str): name of the algorithm.
-        extra_args ({}}): dictionary of additional args:
+        extra_data ({}): dictionary of additional args:
                                 {
-                                    'rel_coef' (int): how relevant should be move for
+                                    'rel_coef' (float): how relevant should be move for
                                                         calculation of median value
                                 }
     """
+
+    def __init__(self, game, history_depth, extra_data):
+        """
+        Constructor.
+
+        Parameters:
+            game (Game): game, that is played with history
+            history_depth (int): how many steps, will be chosen for current one
+            extra_data ({}): dictionary of additional args
+        """
+
+        super().__init__(game, history_depth, extra_data)
+        self.algorithm_name = "AdaptProbs"
 
     def calc_player_income(self, opponent_moves):
         """
@@ -52,13 +65,13 @@ class AdaptProbs(AdaptProbsTemplate):
             if min_val == max_val:
                 return 1.0
 
-            median_opponent_income += (math.pow(self.extra_args['rel_coef'], i) *
+            median_opponent_income += (math.pow(self.extra_data['rel_coef'], i) *
                                        (opponent_moves[i].action_values[last_action] -
                                         min_val) /
                                        (max_val -
                                         min_val))
 
-            divider += math.pow(self.extra_args['rel_coef'], i)
+            divider += math.pow(self.extra_data['rel_coef'], i)
 
         if divider != 0:
             median_opponent_income /= divider
