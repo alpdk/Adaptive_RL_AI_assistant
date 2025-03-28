@@ -1,3 +1,4 @@
+import math
 from abc import abstractmethod
 
 import torch
@@ -29,12 +30,13 @@ class BaseProbsTemplate:
         self.model = model
         self.algorithm_name = None
 
-    def calc_probs(self, root):
+    def calc_probs(self, root, values=None):
         """
         Method for calculating the probabilities of each action
 
         Parameters:
-             root(Node): root of the current game
+             root (Node): root of the current game
+             values (np.array[float]): array of values
 
         Returns:
             np.array[]: probabilities of each action
@@ -42,7 +44,8 @@ class BaseProbsTemplate:
         action_probs = np.zeros(self.game.action_size)
         for child in root.children:
             action = child.action_taken
-            action_probs[action] = child.visit_count
+            # action_probs[action] = math.exp(values[action])
+            action_probs[action] += child.visit_count
         action_probs /= np.sum(action_probs)
 
         return action_probs

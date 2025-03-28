@@ -75,9 +75,6 @@ class Node:
         else:
             q_value = child.value_sum / (child.visit_count + 1)
 
-        if player != self.player:
-            q_value = -q_value
-
         return q_value + self.args['C'] * math.sqrt(math.log(self.visit_count) / (child.visit_count + 1))
 
     def expand(self, policy, player):
@@ -97,13 +94,21 @@ class Node:
                 child = Node(self.game, self.args, next_player, self, action, prob)
                 self.children.append(child)
 
-    def backpropagate(self, value):
+    def backpropagate(self, value, whos_value):
         """
         Method that back propagate a value to all parents.
+
+        Parameters:
+            value (float): value of the move
+            whos_value (int): player who's value we back propagate
         """
-        self.value_sum += value
         self.visit_count += 1
 
         if self.parent is not None:
+            if self.parent.player == whos_value:
+                self.value_sum += value
+            else:
+                self.value_sum -= value
+
             self.game.revert_move()
-            self.parent.backpropagate(value)
+            self.parent.backpropagate(value, whos_value)

@@ -75,13 +75,10 @@ class MCTS(BaseProbsTemplate):
 
                 node.expand(policy, cur_player)
 
-            if player != last_move_player:
-                value = -value
+            node.backpropagate(value, last_move_player)
 
-            node.backpropagate(value)
-
-        action_probs = self.calc_probs(root)
         action_values = self.calc_values(root)
+        action_probs = self.calc_probs(root, action_values)
         # action_visits = self.calc_visits(root)
 
         return action_probs, action_values
