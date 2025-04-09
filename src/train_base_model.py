@@ -1,11 +1,14 @@
+import math
+
 from src.external_methods_and_arguments import *
 
 train_args = {
-    'C': 2,
-    'num_iterations': 3,
-    'num_searches': 200,
+    'C': math.sqrt(2),
+    'tau': 1,
+    'num_iterations': 5,
+    'num_searches': 100,
     'num_selfPlay_iterations': 200,
-    'num_epochs': 200,
+    'num_epochs': 100,
     'batch_size': 64,
     'temperature': 1.25,
     'dirichlet_epsilon': 0.25,

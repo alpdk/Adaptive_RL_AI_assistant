@@ -15,6 +15,7 @@ class Node:
          children ([Node]): Children of this node.
          visit_count (int): Visit count for this node.
          value_sum (int): Value sum for this node.
+         policy (np.array[]): Policy for moves from this node.
     """
 
     def __init__(self, game, args, player=0, parent=None, action_taken=None, visit_count=0):
@@ -29,6 +30,8 @@ class Node:
         self.visit_count = visit_count
         self.value_sum = 0
 
+        self.policy = None
+
     def is_fully_expanded(self):
         """
         Check if the node is fully expanded (all children are defined)
@@ -38,44 +41,41 @@ class Node:
         """
         return len(self.children) > 0
 
-    def select(self, player):
+    def select(self):
         """
-        Algorithm that return the best node with highest ucb value.
-
-        Parameters:
-            player(int): current player
+        Algorithm that return the best node with highest gpuct value.
 
         Returns:
-             (Node): The best node with highest ucb value.
+            best_child (Node): The best node with highest gpuct value.
         """
         best_child = None
-        best_ucb = -np.inf
+        best_gpuct = -np.inf
 
         for child in self.children:
-            ucb = self.get_ucb(child, player)
-            if ucb > best_ucb:
+            gpuct = self.get_gpuct(child, child.action_taken)
+            if gpuct > best_gpuct:
                 best_child = child
-                best_ucb = ucb
+                best_gpuct = gpuct
 
         return best_child
 
-    def get_ucb(self, child, player):
+    def get_gpuct(self, child, move_index):
         """
         Calculate the ucb value of a child node.
 
         Parameters:
             child (Node): The child node.
-            player(int): current player
+            move_index (int): Move index for reaching child node.
 
         Returns:
             ucb (int): The ucb value of a child node.
         """
         if child.visit_count == 0:
-            q_value = 0
-        else:
-            q_value = child.value_sum / (child.visit_count + 1)
+            return np.inf
 
-        return q_value + self.args['C'] * math.sqrt(math.log(self.visit_count) / (child.visit_count + 1))
+        q_value = child.value_sum
+
+        return q_value + self.policy[move_index] * self.args['C'] * math.exp(self.args['tau'] * math.log(self.visit_count)) / (child.visit_count + 1)
 
     def expand(self, policy, player):
         """
@@ -94,21 +94,21 @@ class Node:
                 child = Node(self.game, self.args, next_player, self, action, prob)
                 self.children.append(child)
 
-    def backpropagate(self, value, whos_value):
+    def backpropagation(self, value, whose_value):
         """
-        Method that back propagate a value to all parents.
+        Method that backpropagation a value to all parents.
 
         Parameters:
             value (float): value of the move
-            whos_value (int): player who's value we back propagate
+            whose_value (int): player whose value we back propagate
         """
         self.visit_count += 1
 
         if self.parent is not None:
-            if self.parent.player == whos_value:
+            if self.parent.player == whose_value:
                 self.value_sum += value
             else:
                 self.value_sum -= value
 
             self.game.revert_move()
-            self.parent.backpropagate(value, whos_value)
+            self.parent.backpropagation(value, whose_value)

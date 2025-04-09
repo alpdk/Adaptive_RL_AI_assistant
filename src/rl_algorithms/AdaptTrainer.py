@@ -41,11 +41,8 @@ class AdaptTrainer(TrainerTemplate):
             valid_moves_list = np.zeros(self.game.action_size, dtype=bool)
             valid_moves_list[valid_moves] = True
 
-            action_probs = torch.softmax(action_probs, axis=1).squeeze(0).cpu().detach().numpy()
-            action_values = torch.squeeze(action_values, dim=0).cpu().detach().numpy()
-
-            action_probs = action_probs * valid_moves_list
-            action_probs = action_probs / action_probs.sum()
+            action_probs = self.game.get_normal_policy(action_probs, player)
+            action_values = self.game.get_normal_values(action_values, player)
 
             self.game.logger.set_action_probs_and_values(action_probs, action_values)
 

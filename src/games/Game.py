@@ -2,6 +2,9 @@ import numpy as np
 
 from abc import abstractmethod
 
+import torch
+
+
 class Game:
     """
     This is a parent class, for games, that will be used for training model
@@ -214,3 +217,38 @@ class Game:
             terminated (bool): terminated or not
         """
         pass
+
+    def get_normal_policy(self, policy, player):
+        """
+        Return normalized policy of moves
+
+        Returns:
+            policy (np.array): Policy of moves from current state
+            player (int): index of the player who took the action
+        """
+        policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
+
+        valid_moves = self.get_valid_moves(player)
+        valid_moves = self.get_moves_to_np_array(valid_moves)
+
+        policy = policy * valid_moves
+        policy = policy / np.sum(policy)
+
+        return policy
+
+    def get_normal_values(self, values, player):
+        """
+        Return normalized policy of moves
+
+        Returns:
+            values (np.array): values of moves from current state
+            player (int): index of the player who took the action
+        """
+        values = torch.softmax(values, axis=1).squeeze(0).detach().cpu().numpy()
+
+        valid_moves = self.get_valid_moves(player)
+        valid_moves = self.get_moves_to_np_array(valid_moves)
+
+        values = values * valid_moves
+
+        return values

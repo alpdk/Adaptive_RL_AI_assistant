@@ -15,7 +15,7 @@ class AdaptProbs(AdaptProbsTemplate):
         algorithm_name (str): name of the algorithm.
         extra_data ({}): dictionary of additional args:
                                 {
-                                    'rel_coef' (float): how relevant should be move for
+                                    'rel_coef' (float): how relevant should be moved for
                                                         calculation of median value
                                 }
     """
@@ -78,6 +78,33 @@ class AdaptProbs(AdaptProbsTemplate):
 
         return median_opponent_income
 
+    # def calc_player_income(self, opponent_moves):
+    #     """
+    #     Method for calculating opponent player's income for last n moves.
+    #
+    #     Parameters:
+    #          opponent_moves (np.ndarray): opponent moves
+    #
+    #     Returns:
+    #         int: median income by player
+    #     """
+    #     median_opponent_income = 0
+    #     divider = 0
+    #
+    #     if opponent_moves[0] == None:
+    #         return 1
+    #
+    #     for i in range(len(opponent_moves)):
+    #         if opponent_moves[i] is None:
+    #             break
+    #
+    #         last_action = opponent_moves[i].child.last_action
+    #
+    #         median_opponent_income += opponent_moves[i].action_values[last_action] * math.pow(self.extra_data['rel_coef'], i)
+    #         divider += 1
+    #
+    #     return median_opponent_income / divider
+
     def probs_modification(self):
         """
         Method for probs modification
@@ -110,6 +137,10 @@ class AdaptProbs(AdaptProbsTemplate):
                 median_income = ((self.game.logger.action_values[i] - min_val) /
                                  (max_val - min_val))
                 new_probs[i] = 1.0 / (abs(median_income - median_opponent_income) + 1e-3)
+
+        # for i in range(len(self.game.logger.action_values)):
+        #     if self.game.logger.action_values[i] != 0:
+        #         new_probs[i] = 1.0 / (abs(self.game.logger.action_values[i] - median_opponent_income) + 1e-3)
 
         new_probs = new_probs / np.sum(new_probs)
 

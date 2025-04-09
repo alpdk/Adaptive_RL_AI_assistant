@@ -117,16 +117,8 @@ def main():
                 policy, moves_values, _ = base_model2(
                     torch.tensor(game.get_encoded_state(game.logger.current_state), device=base_model2.device).unsqueeze(0))
 
-            policy = torch.softmax(policy, axis=1).squeeze(0).cpu().detach().numpy()
-            moves_values = torch.squeeze(moves_values, dim=0).cpu().detach().numpy()
-
-            valid_moves_list = np.zeros(game.action_size, dtype=bool)
-            valid_moves_list[valid_moves] = True
-
-            policy = policy * valid_moves_list
-            policy = policy / policy.sum()
-
-            moves_values = moves_values * valid_moves_list
+            policy = game.get_normal_policy(policy, cur_player)
+            moves_values = game.get_normal_values(moves_values, cur_player)
 
             game.logger.set_action_probs_and_values(policy, moves_values)
 
@@ -148,9 +140,7 @@ def main():
 
                     policy = adapt_model_2(torch.tensor(input, dtype=torch.float32, device=adapt_model_2.device).unsqueeze(0))
 
-                policy = torch.softmax(policy, axis=1).squeeze(0).cpu().detach().numpy()
-                policy = policy * valid_moves_list
-                policy = policy / policy.sum()
+                policy = game.get_normal_policy(policy, cur_player)
 
             # action = np.random.choice(game.action_size, p=policy)
             action = np.argmax(policy)

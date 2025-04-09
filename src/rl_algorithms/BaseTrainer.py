@@ -54,6 +54,7 @@ class BaseTrainer(TrainerTemplate):
                         self.game.get_encoded_state(hist_neutral_state),
                         hist_action_probs,
                         hist_moves_values,
+                        hist_player,
                         hist_outcome
                     ))
 
@@ -75,16 +76,19 @@ class BaseTrainer(TrainerTemplate):
 
         for batchIdx in range(0, len(memory), self.args['batch_size']):
             sample = memory[batchIdx:min(len(memory) - 1, batchIdx + self.args['batch_size'])]
-            state, policy_targets, moves_values_targets, value_targets = zip(*sample)
+            state, policy_targets, moves_values_targets, player, value_targets = zip(*sample)
 
-            state, policy_targets, moves_values_targets, value_targets = (np.array(state),
-                                                                          np.array(policy_targets),
-                                                                          np.array(moves_values_targets),
-                                                                          np.array(value_targets))
+            state, policy_targets, moves_values_targets, player, value_targets = (np.array(state),
+                                                                                  np.array(policy_targets),
+                                                                                  np.array(moves_values_targets),
+                                                                                  np.array(player),
+                                                                                  np.array(value_targets))
 
             state = torch.tensor(state, dtype=torch.float32, device=self.base_model.device)
             policy_targets = torch.tensor(policy_targets, dtype=torch.float32, device=self.base_model.device)
-            moves_values_targets = torch.tensor(moves_values_targets, dtype=torch.float32, device=self.base_model.device)
+            moves_values_targets = torch.tensor(moves_values_targets, dtype=torch.float32,
+                                                device=self.base_model.device)
+            player = torch.tensor(player, dtype=torch.float32, device=self.base_model.device)
             value_targets = torch.tensor(value_targets, dtype=torch.float32, device=self.base_model.device)
 
             # out_policy, out_value = self.model(state)

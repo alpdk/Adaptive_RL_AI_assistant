@@ -4,6 +4,7 @@ import numpy as np
 from src.rl_algorithms.base_rl_algorithms.BaseProbsTemplate import BaseProbsTemplate
 from src.rl_algorithms.base_rl_algorithms.Node import Node
 
+
 class MCTS(BaseProbsTemplate):
     """
     Class implementing Monte-Carlo Tree Search (MCTS) algorithm.
@@ -35,19 +36,22 @@ class MCTS(BaseProbsTemplate):
             player (int): current player
 
         Returns:
-            action (np.array): action probabilities
+            action_probs (np.array): action probabilities
+            action_values (np.array): action values
         """
-        root = Node(self.game, self.args, player, None, None, visit_count = 1)
+        root = Node(self.game, self.args, player, None, None, visit_count=1)
 
-        policy, _, value = self.model(torch.tensor(self.game.get_encoded_state(self.game.logger.current_state), device=self.model.device).unsqueeze(0))
+        policy, _, value = self.model(torch.tensor(self.game.get_encoded_state(self.game.logger.current_state),
+                                                   device=self.model.device).unsqueeze(0))
         policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
 
-        policy = (1 - self.args['dirichlet_epsilon']) * policy + np.random.dirichlet([self.args['dirichlet_alpha']] * self.game.action_size) * self.args['dirichlet_epsilon']
+        policy = (1 - self.args['dirichlet_epsilon']) * policy + np.random.dirichlet(
+            [self.args['dirichlet_alpha']] * self.game.action_size) * self.args['dirichlet_epsilon']
 
         valid_moves = self.game.get_valid_moves(player)
         valid_moves = self.game.get_moves_to_np_array(valid_moves)
-        policy = policy * valid_moves
 
+        policy = policy * valid_moves
         policy = policy / np.sum(policy)
 
         root.expand(policy, player)
@@ -56,29 +60,41 @@ class MCTS(BaseProbsTemplate):
             node = root
 
             while node.is_fully_expanded():
-                node = node.select(player)
+                if node.policy is None:
+                    policy, _, _ = self.model(torch.tensor(self.game.get_encoded_state(self.game.logger.current_state),
+                                                           device=self.model.device).unsqueeze(0))
+                    cur_player = node.player
+
+                    policy = self.game.get_normal_policy(policy, cur_player)
+
+                    node.policy = policy
+
+                node = node.select()
                 self.game.make_move(node.action_taken, node.parent.player)
 
             last_move_player = node.parent.player
             value, is_terminal = self.game.get_value_and_terminated(last_move_player)
 
             if not is_terminal:
-                policy, _, value = self.model(torch.tensor(self.game.get_encoded_state(self.game.logger.current_state), device=self.model.device).unsqueeze(0))
-                policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
+                policy, _, value = self.model(torch.tensor(self.game.get_encoded_state(self.game.logger.current_state),
+                                                           device=self.model.device).unsqueeze(0))
                 cur_player = node.player
-                valid_moves = self.game.get_valid_moves(cur_player)
-                valid_moves = self.game.get_moves_to_np_array(valid_moves)
-                policy = policy * valid_moves
-                policy = policy / np.sum(policy)
 
+                policy = self.game.get_normal_policy(policy, cur_player)
                 value = value.item()
 
                 node.expand(policy, cur_player)
 
-            node.backpropagate(value, last_move_player)
+            node.backpropagation(value, last_move_player)
 
         action_values = self.calc_values(root)
         action_probs = self.calc_probs(root, action_values)
         # action_visits = self.calc_visits(root)
+
+        # node = root
+        #
+        # while node.is_fully_expanded():
+        #     node = node.select(player)
+        #     self.game.make_move(node.action_taken, node.parent.player)
 
         return action_probs, action_values
