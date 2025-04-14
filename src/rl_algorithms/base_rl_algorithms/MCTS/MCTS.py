@@ -70,6 +70,8 @@ class MCTS(BaseProbsTemplate):
                     node.policy = policy
 
                 node = node.select()
+                if node.action_taken is None:
+                    print("AAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaa")
                 self.game.make_move(node.action_taken, node.parent.player)
 
             last_move_player = node.parent.player

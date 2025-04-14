@@ -29,6 +29,26 @@ class Game:
     game_name = None
     logger = None
 
+    @abstractmethod
+    def get_row(self):
+        """
+        Method for returning the row_count value
+
+        Returns:
+            row_count (int): count of rows in the game
+        """
+        return self.row_count
+
+    @abstractmethod
+    def get_column(self):
+        """
+        Method for returning the column_count value
+
+        Returns:
+            column_count (int): count of rows in the game
+        """
+        return self.column_count
+
     def get_moves_to_np_array(self, valid_moves):
         """
         Returns a numpy array with a size equal to the number of actions.
@@ -159,11 +179,20 @@ class Game:
         """
         pass
 
+    @abstractmethod
+    def return_to_base(self):
+        """
+        This method will be returning some parameters to their base values
+        """
+        pass
+
     def revert_move(self):
         """
         Revert last move.
         """
         self.logger = self.logger.parent
+
+        self.return_to_base()
 
         self.logger.child.parent = None
         self.logger.child = None

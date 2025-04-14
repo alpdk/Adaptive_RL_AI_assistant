@@ -4,6 +4,7 @@ import argparse
 
 from src.games.Checkers import Checkers
 from src.games.Game import Game
+from src.games.UltimateTicTacToe import UltimateTicTacToe
 from src.models_structures.adaptive_play.BaseLinear import BaseLinear
 from src.models_structures.base_play.ResNet import ResNet
 from src.rl_algorithms.adapt_probs_algorithms.AdaptProbs.AdaptProbs import AdaptProbs
@@ -29,6 +30,8 @@ def load_game(name: str):
     match name:
         case "checkers":
             return Checkers(4, 4)
+        case "ultimatetictactoe":
+            return UltimateTicTacToe(2, 2)
         case _:
             return None
 

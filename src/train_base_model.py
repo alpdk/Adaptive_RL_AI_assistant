@@ -6,7 +6,7 @@ train_args = {
     'C': math.sqrt(2),
     'tau': 1,
     'num_iterations': 5,
-    'num_searches': 100,
+    'num_searches': 200,
     'num_selfPlay_iterations': 200,
     'num_epochs': 100,
     'batch_size': 64,

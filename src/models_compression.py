@@ -172,8 +172,7 @@ def main():
 
             cur_player = game.get_next_player(action, cur_player)
 
-        while game.logger.parent is not None:
-            game.revert_move()
+        game.revert_full_game()
 
     print(score)
 

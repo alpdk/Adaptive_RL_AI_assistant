@@ -1,7 +1,7 @@
 import numpy as np
 
-from .Game import Game
-from .LoggerNode import LoggerNode
+from src.games.Game import Game
+from src.games.LoggerNode import LoggerNode
 
 
 class Checkers(Game):
