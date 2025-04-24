@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class ResNet(nn.Module):
     """
     Class that provide a model, that will be trained for move probability prediction.
@@ -14,6 +15,7 @@ class ResNet(nn.Module):
         valueHead (nn.Sequential): value head of the model
         structure_name (string): name of the model structure
     """
+
     def __init__(self, game, num_resBlocks, num_hidden, device):
         """
         Initializer
@@ -101,6 +103,7 @@ class ResBlock(nn.Module):
         layer1 (nn.Sequential): first convolution layer with batch normalization.
         layer2 (nn.Sequential): second convolution layer with batch normalization.
     """
+
     def __init__(self, num_hidden):
         """
         Initializer

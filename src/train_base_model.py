@@ -3,12 +3,12 @@ import math
 from src.external_methods_and_arguments import *
 
 train_args = {
-    'C': math.sqrt(2),
+    'C':  math.sqrt(2),
     'tau': 1,
     'num_iterations': 5,
-    'num_searches': 200,
-    'num_selfPlay_iterations': 200,
-    'num_epochs': 100,
+    'num_searches': 800,
+    'num_selfPlay_iterations': 300,
+    'num_epochs': 300,
     'batch_size': 64,
     'temperature': 1.25,
     'dirichlet_epsilon': 0.25,
@@ -35,7 +35,21 @@ def parse_base_model_arguments():
     parser.add_argument('rl_algorithm_name', type=str,
                         help='Name of local trained model with specific algorithm weights')
 
+    parser.add_argument('load_weights', type=int,
+                        help='Load wights or not')
+
     return parser.parse_args()
+
+def load_weights(model, game, args):
+    model_weights = "model_" + game.game_name.lower() + "_" + args.rl_algorithm_name.lower() + "_" + args.model_structure_name.lower() + ".pth"
+
+    path = os.path.dirname(os.path.abspath(__file__))
+    path = path + f'/base_models_weights/{model_weights}'
+
+    if os.path.exists(path):
+        print(
+            f'Model trained for game \"{game.game_name.lower()}\", algorithm \"{args.rl_algorithm_name.lower()}\", and model structure \"{args.model_structure_name.lower()}\" does exist inside of the \"base_models_weights/\" directory!')
+        model.load_state_dict(torch.load(path, weights_only=True))
 
 def main():
     """
@@ -57,7 +71,13 @@ def main():
         print("Cannot work without a model!!!")
         return 1
 
+    if args.load_weights == 1:
+        load_weights(model, game, args)
+
+    # model.load_state_dict(torch.load("/home/alpdk/gitRepos/Adaptive_RL_AI_assistant/src/base_models_weights/model_ultimatetictactoe_mcts_resnet.pth", weights_only=True))
+
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.0001)
+    # optimizer = model.get_optimizer()
 
     rl_algorithm = load_rl_algorithm(args.rl_algorithm_name, game, train_args, model)
 

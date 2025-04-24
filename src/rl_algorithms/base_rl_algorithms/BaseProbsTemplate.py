@@ -63,7 +63,7 @@ class BaseProbsTemplate:
         action_values = np.zeros(self.game.action_size)
         for child in root.children:
             action = child.action_taken
-            action_values[action] = child.value_sum
+            action_values[action] = child.value_sum / child.visit_count
 
         return action_values
 

@@ -201,9 +201,6 @@ class UltimateTicTacToe(Game):
         allowed_field = action - first_subfield_action
         add_vars[0] = allowed_field
 
-        if self.logger.additional_vars[2][add_vars[0] // self.column_count, add_vars[0] % self.column_count] != None:
-            add_vars[0] = -1
-
         # Create field for checking condition
         test_subfield = np.zeros((self.row_count, self.column_count), dtype=int)
 
@@ -217,6 +214,10 @@ class UltimateTicTacToe(Game):
         field_row, field_column = self.logger.additional_vars[1] // self.column_count, self.logger.additional_vars[1] % self.column_count
         new_field_res[field_row, field_column] = self._check_field_win(test_subfield,  action % (self.row_count * self.column_count), player)
         add_vars[2] = new_field_res
+
+
+        if add_vars[2][add_vars[0] // self.column_count, add_vars[0] % self.column_count] != None:
+            add_vars[0] = -1
 
         # Save new_game_log node
         new_game_log.additional_vars = add_vars
@@ -257,7 +258,7 @@ class UltimateTicTacToe(Game):
 
         field_cell = self.logger.additional_vars[0]
 
-        if field_cell == -1 or self.logger.additional_vars[2][field_cell // self.column_count, field_cell % self.column_count] != None:
+        if field_cell == -1 or self.logger.additional_vars[2][field_cell // self.column_count, field_cell % self.column_count] is not None:
             i = 0
 
             while i < self.row_count * self.column_count * self.row_count * self.column_count:
@@ -324,20 +325,23 @@ class UltimateTicTacToe(Game):
 
         res = self._check_field_win(state, move, player)
 
+        if player == res:
+            res = 1
+
         if res == 0:
-            player_1_sum, player_2_sum = 0, 0
+            cur_player, opponent_player = 0, 0
 
             for i in range(self.row_count):
                 for j in range(self.column_count):
                     if state[i, j] == player:
-                        player_1_sum += 1
+                        cur_player += 1
                     elif state[i, j] == -player:
-                        player_2_sum += 1
+                        opponent_player += 1
 
-            if player_1_sum > player_2_sum:
-                res = player
-            elif player_1_sum < player_2_sum:
-                res = -player
+            if cur_player > opponent_player:
+                res = 1
+            elif cur_player < opponent_player:
+                res = -1
 
         return res, res is not None
 

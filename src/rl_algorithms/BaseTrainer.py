@@ -108,10 +108,13 @@ class BaseTrainer(TrainerTemplate):
 
             overall_mid_loss = overall_mid_loss + loss
 
-            """"""
-
             self.optimizer.zero_grad()
+
+            policy_loss.backward(retain_graph=True)
+            moves_values_loss.backward(retain_graph=True)
+            value_loss.backward(retain_graph=True)
             loss.backward()
+
             self.optimizer.step()
         print("Loss: ", overall_mid_loss / (len(memory) // self.args['batch_size'] + 1))
 

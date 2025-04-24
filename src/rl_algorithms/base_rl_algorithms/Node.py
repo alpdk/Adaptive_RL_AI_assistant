@@ -1,4 +1,6 @@
 import math
+import random
+
 import numpy as np
 
 
@@ -48,16 +50,20 @@ class Node:
         Returns:
             best_child (Node): The best node with highest gpuct value.
         """
-        best_child = None
+        best_children = []
         best_gpuct = -np.inf
 
         for child in self.children:
             gpuct = self.get_gpuct(child, child.action_taken)
             if gpuct > best_gpuct:
-                best_child = child
+                best_children = [child]
                 best_gpuct = gpuct
+            elif gpuct == best_gpuct:
+                best_children.append(child)
 
-        return best_child
+        random_best_child = random.choice(best_children)
+
+        return random_best_child
 
     def get_gpuct(self, child, move_index):
         """
@@ -73,9 +79,13 @@ class Node:
         if child.visit_count == 0:
             return np.inf
 
-        q_value = child.value_sum
+        q_value = child.value_sum / (child.visit_count + 1)
 
         return q_value + self.policy[move_index] * self.args['C'] * math.exp(self.args['tau'] * math.log(self.visit_count)) / (child.visit_count + 1)
+
+        # q_value = child.value_sum / (child.visit_count + 1)
+        #
+        # return q_value + self.policy[move_index] * self.args['C'] * math.exp(self.args['tau'] * math.log(self.visit_count)) / (child.visit_count + 1)
 
     def expand(self, policy, player):
         """
@@ -91,7 +101,7 @@ class Node:
                 next_player = self.game.logger.current_player
                 self.game.revert_move()
 
-                child = Node(self.game, self.args, next_player, self, action, prob)
+                child = Node(self.game, self.args, next_player, self, action)
                 self.children.append(child)
 
     def backpropagation(self, value, whose_value):
