@@ -28,6 +28,35 @@ class MCTS(BaseProbsTemplate):
         super().__init__(game, args, model)
         self.algorithm_name = "MCTS"
 
+    def load_layer(self, layer=0):
+        """
+
+        :return:
+        """
+        pass
+
+    def save_data_in_layer(self, layer=0):
+        """
+
+        :param layer:
+        :return:
+        """
+        pass
+
+    def check_existing_layers(self, layer=0):
+        """
+        This method checking existence of states, and use them, if they are exist
+
+        Parameters:
+             layer (int): index of layer to check.
+
+        Returns:
+            action_probs (np.array): action probabilities
+            action_values (np.array): action values
+        """
+
+        pass
+
     def search(self, player):
         """
         Method that performs MCTS search.

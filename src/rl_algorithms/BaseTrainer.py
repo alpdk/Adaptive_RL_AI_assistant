@@ -32,9 +32,16 @@ class BaseTrainer(TrainerTemplate):
         """
         memory = []
         player = 1
+        layer = 0
 
         while True:
-            action_probs, moves_values = self.algorithm.search(player)
+            data = self.check_existing_layers(layer)
+
+            if data is None:
+                action_probs, moves_values = self.algorithm.search(player)
+                self.save_data_in_layer(action_probs, moves_values, layer)
+            else:
+                action_probs, moves_values = data[0], data[1]
 
             memory.append((self.game.logger.current_state, action_probs, moves_values, player))
 
@@ -42,6 +49,7 @@ class BaseTrainer(TrainerTemplate):
             # action_probs = temperature_action_probs / np.sum(temperature_action_probs)
             action = np.random.choice(self.game.action_size, p=action_probs)
             self.game.make_move(action, player)
+            layer += 1
 
             value, is_terminal = self.game.get_value_and_terminated(player)
 
@@ -99,8 +107,8 @@ class BaseTrainer(TrainerTemplate):
             """
 
             policy_loss = F.cross_entropy(out_policy, policy_targets)
-            moves_values_loss = F.l1_loss(out_moves_values, moves_values_targets)
-            # moves_values_loss = F.mse_loss(out_moves_values, moves_values_targets)
+            # moves_values_loss = F.l1_loss(out_moves_values, moves_values_targets)
+            moves_values_loss = F.mse_loss(out_moves_values, moves_values_targets)
             # moves_values_loss = F.pairwise_distance(out_moves_values, moves_values_targets, p=2)
             value_loss = F.mse_loss(out_value, value_targets.view(-1, 1))
 
@@ -110,9 +118,9 @@ class BaseTrainer(TrainerTemplate):
 
             self.optimizer.zero_grad()
 
-            policy_loss.backward(retain_graph=True)
-            moves_values_loss.backward(retain_graph=True)
-            value_loss.backward(retain_graph=True)
+            # policy_loss.backward(retain_graph=True)
+            # moves_values_loss.backward(retain_graph=True)
+            # value_loss.backward(retain_graph=True)
             loss.backward()
 
             self.optimizer.step()
@@ -134,6 +142,8 @@ class BaseTrainer(TrainerTemplate):
 
             for selfPlay_iteration in trange(self.args['num_selfPlay_iterations']):
                 memory += self.selfPlay()
+
+            self.clear_save_states()
 
             self.base_model.train()
 

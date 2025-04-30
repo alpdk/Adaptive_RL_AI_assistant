@@ -1,3 +1,4 @@
+import json
 from abc import abstractmethod
 
 import os
@@ -87,6 +88,90 @@ class TrainerTemplate:
 
         return model_dir, optimizer_dir
 
+    def load_layer(self, path):
+        """
+        This method load game state layers, to find equal states of the game
+
+        Parameters:
+            path (): path to the layer for loading
+
+        Returns:
+            res ({}}): dictionary for the layer
+        """
+        res = {}
+
+        if not os.path.exists(path):
+            return res
+
+        with open(path, "r") as f:
+            res = json.load(f)
+
+        return res
+
+    def save_data_in_layer(self, probs, move_values, layer=0):
+        """
+        This method save game state to the layer
+
+        Parameters:
+            layer (int): index of layer to check.
+        """
+        current_key = self.game.create_current_key()
+        current_value = self.game.create_current_value(probs, move_values)
+
+        path = os.path.dirname(os.path.abspath(__file__))
+        path = path + f'/saved_states/layer_{layer}.json'
+
+        layer = self.load_layer(path)
+
+        layer[current_key] = current_value
+
+        with open(path, "w") as f:
+            json.dump(layer, f)
+
+    def check_existing_layers(self, start_layer=0):
+        """
+        This method checking existence of states, and use them, if they are exist
+
+        Parameters:
+             start_layer (int): index of layer for the start of the search.
+
+        Returns:
+            action_probs (np.array): action probabilities
+            action_values (np.array): action values
+        """
+        path = os.path.dirname(os.path.abspath(__file__))
+        path = path + f'/saved_states/'
+
+        current_key = self.game.create_current_key()
+
+        for i in range(start_layer, -1, -1):
+            layer_path = path + f'layer_{i}.json'
+
+            if not os.path.exists(layer_path):
+                continue
+
+            dict = self.load_layer(layer_path)
+
+            if current_key in dict.keys():
+                return self.game.transform_value_to_data(dict[current_key])
+
+        return None
+
+    def clear_save_states(self):
+        """
+        Method for cleaning save_states directory
+        """
+        path = os.path.dirname(os.path.abspath(__file__))
+        path = path + f'/saved_states/'
+
+        for filename in os.listdir(path):
+            file_path = os.path.join(path, filename)
+            try:
+                if os.path.isfile(file_path):  # Only delete files
+                    os.remove(file_path)
+                    print(f"Deleted file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting {file_path}: {e}")
 
     @abstractmethod
     def selfPlay(self):

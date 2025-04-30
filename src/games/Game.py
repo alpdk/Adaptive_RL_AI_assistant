@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 
 from abc import abstractmethod
@@ -281,3 +283,86 @@ class Game:
         values = values * valid_moves
 
         return values
+
+    # @abstractmethod
+    # def create_current_key(self):
+    #     """
+    #     Transforms data, that will be used as a key, to some format
+    #
+    #     Returns:
+    #          res (string): new format, for the json
+    #     """
+    #     pass
+    #
+    # @abstractmethod
+    # def create_current_value(self, probs, value, move_values):
+    #     """
+    #     Transforms data, that will be used as a value, to some format
+    #
+    #     Parameters:
+    #         probs (np.array): values of moves from current state
+    #         value (integer): value of the current state
+    #         move_values (np.array): values of moves from current state
+    #
+    #     Returns:
+    #          res (): new format, for the json
+    #     """
+    #     pass
+    #
+    # @abstractmethod
+    # def transform_value_to_data(self, value):
+    #     """
+    #     Transforms value from the json to our actual data
+    #
+    #     Parameters:
+    #         value ([]): some value, that should be parsed
+    #
+    #     Returns:
+    #         probs (np.array): values of moves from current state
+    #         value (int): value of the current state
+    #         move_values (np.array): values of moves from current state
+    #     """
+    #     pass
+
+    def create_current_key(self):
+        """
+        Transforms data, that will be used as a key, to some format
+
+        Returns:
+             res (string): new format, for the json
+        """
+        state = self.logger.current_state.tolist()
+        player = self.logger.current_player
+
+        data = [state, player]
+        return json.dumps(data)
+
+    def create_current_value(self, probs, move_values):
+        """
+        Transforms data, that will be used as a value, to some format
+
+        Parameters:
+            probs (np.array): values of moves from current state
+            move_values (np.array): values of moves from current state
+
+        Returns:
+             res (): new format, for the json
+        """
+        return [probs.tolist(), move_values.tolist()]
+
+    def transform_value_to_data(self, value):
+        """
+        Transforms value from the json to our actual data
+
+        Parameters:
+            value ([]): some value, that should be parsed
+
+        Returns:
+            res ([]):
+                probs (np.array): values of moves from current state
+                move_values (np.array): values of moves from current state
+        """
+        probs = np.array(value[0])
+        move_values = np.array(value[1])
+
+        return [probs, move_values]
