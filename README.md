@@ -20,7 +20,7 @@ After that, you should run train_model_script, that require variables:
 Example:
 
 ``
-python train_model.py Chess ResNet AlphaZero
+python train_model.py UltimateTicTacToe ResNet AlphaZero
 ``
 
 ## How to compare models
