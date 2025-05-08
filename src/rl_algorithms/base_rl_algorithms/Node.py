@@ -81,7 +81,7 @@ class Node:
 
         q_value = child.value_sum / (child.visit_count + 1)
 
-        return q_value + self.args['C'] * math.exp(self.args['tau'] * math.log(self.visit_count)) / (child.visit_count + 1)
+        return q_value + self.policy[move_index] * self.args['C'] * math.exp(self.args['tau'] * math.log(self.visit_count)) / (child.visit_count + 1)
 
         # q_value = child.value_sum / (child.visit_count + 1)
         #

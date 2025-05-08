@@ -71,6 +71,8 @@ class AdaptProbs(AdaptProbsTemplate):
                                        (max_val -
                                         min_val))
 
+            # median_opponent_income += opponent_moves[i].action_values[last_action]
+
             divider += math.pow(self.extra_data['rel_coef'], i)
 
         if divider != 0:
@@ -132,15 +134,47 @@ class AdaptProbs(AdaptProbsTemplate):
         if min_val == max_val:
             return 1, self.game.logger.action_probs
 
+        # median_min_val = np.inf
+        # median_max_val = -np.inf
+        #
+        # for i in range(len(self.game.logger.action_values)):
+        #     if self.game.logger.action_probs[i] != 0:
+        #         if self.game.logger.action_values[i] >= median_opponent_income:
+        #             median_min_val = min(median_min_val, self.game.logger.action_values[i])
+        #         elif self.game.logger.action_values[i] <= median_opponent_income:
+        #             median_max_val = max(median_max_val, self.game.logger.action_values[i])
+        #
+        # if median_max_val == -np.inf:
+        #     median_max_val = median_min_val
+        #
+        # if median_min_val == np.inf:
+        #     median_min_val = median_max_val
+        #
+        # median_player_income = (median_max_val + median_min_val) / 2
+        # median_player_income += abs(median_max_val - median_min_val) * 0.05
+
         for i in range(len(self.game.logger.action_values)):
             if self.game.logger.action_values[i] != 0:
                 median_income = ((self.game.logger.action_values[i] - min_val) /
                                  (max_val - min_val))
                 new_probs[i] = 1.0 / (abs(median_income - median_opponent_income) + 1e-3)
+        #         new_probs[i] = 1.0 / (abs(self.game.logger.action_values[i] - median_player_income) + 1e-3)
 
         # for i in range(len(self.game.logger.action_values)):
         #     if self.game.logger.action_values[i] != 0:
         #         new_probs[i] = 1.0 / (abs(self.game.logger.action_values[i] - median_opponent_income) + 1e-3)
+
+        # for i in range(len(self.game.logger.action_values)):
+        #     if self.game.logger.action_values[i] != 0:
+        #         move_value = self.game.logger.action_values[i]
+        #
+        #         if move_value > 1:
+        #             move_value = 1
+        #
+        #         if move_value < -1:
+        #             move_value = -1
+        #
+        #         new_probs[i] = (1 / abs(median_opponent_income - move_value) + 1e-3)
 
         new_probs = new_probs / np.sum(new_probs)
 

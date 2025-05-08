@@ -3,13 +3,13 @@ import math
 from src.external_methods_and_arguments import *
 
 train_args = {
-    'C':  math.sqrt(2),
-    'tau': 1,
-    'num_iterations': 5,
-    'num_searches': 800,
-    'num_selfPlay_iterations': 300,
-    'num_epochs': 300,
-    'batch_size': 64,
+    'C':  0.57,
+    'tau': 0.737,
+    'num_iterations': 10,
+    'num_searches': 500,
+    'num_selfPlay_iterations': 2000,
+    'num_epochs': 150,
+    'batch_size': 200,
     'temperature': 1.25,
     'dirichlet_epsilon': 0.25,
     'dirichlet_alpha': 0.3,

@@ -81,6 +81,9 @@ class BaseTrainer(TrainerTemplate):
         random.shuffle(memory)
 
         overall_mid_loss = 0
+        overall_policy_loss = 0
+        overall_moves_values_loss = 0
+        overall_value_loss = 0
 
         for batchIdx in range(0, len(memory), self.args['batch_size']):
             sample = memory[batchIdx:min(len(memory) - 1, batchIdx + self.args['batch_size'])]
@@ -112,9 +115,18 @@ class BaseTrainer(TrainerTemplate):
             # moves_values_loss = F.pairwise_distance(out_moves_values, moves_values_targets, p=2)
             value_loss = F.mse_loss(out_value, value_targets.view(-1, 1))
 
-            loss = policy_loss + moves_values_loss + value_loss
+            loss_coef = {'policy_loss': 1.0,
+                          'moves_values_loss': 1.0,
+                          'value_loss': 0.1}
+
+            loss = (loss_coef['policy_loss'] * policy_loss +
+                    loss_coef['moves_values_loss'] * moves_values_loss +
+                    loss_coef['value_loss'] * value_loss)
 
             overall_mid_loss = overall_mid_loss + loss
+            overall_policy_loss = overall_policy_loss + loss_coef['policy_loss'] * policy_loss
+            overall_moves_values_loss = overall_moves_values_loss + loss_coef['moves_values_loss'] * moves_values_loss
+            overall_value_loss = overall_value_loss + loss_coef['value_loss'] * value_loss
 
             self.optimizer.zero_grad()
 
@@ -125,6 +137,10 @@ class BaseTrainer(TrainerTemplate):
 
             self.optimizer.step()
         print("Loss: ", overall_mid_loss / (len(memory) // self.args['batch_size'] + 1))
+
+        print(f"policy_loss: {overall_policy_loss / (len(memory) // self.args['batch_size'] + 1)}")
+        print(f"moves_values_loss: {overall_moves_values_loss / (len(memory) // self.args['batch_size'] + 1)}")
+        print(f"value_loss: {overall_value_loss / (len(memory) // self.args['batch_size'] + 1)}")
 
     def learn(self):
         """

@@ -1,3 +1,4 @@
+import torch
 from tqdm import tqdm
 import numpy as np
 
@@ -105,6 +106,7 @@ def main():
 
     for i in tqdm(range(args.rounds_number)):
         cur_player = 1
+        current_balance = 0
 
         while True:
             state = game.logger.current_state
@@ -128,6 +130,7 @@ def main():
                 if cur_player == 1:
                     median_opponent_income = torch.tensor([adapt_probs.calc_player_income(opponent_moves)],
                                                           device=adapt_model_1.device)
+                    # median_opponent_income = torch.tensor([1.0], device=adapt_model_2.device)
 
                     input = np.concatenate((median_opponent_income, torch.from_numpy(policy)), axis=0)
 
@@ -135,6 +138,7 @@ def main():
                 else:
                     median_opponent_income = torch.tensor([adapt_probs.calc_player_income(opponent_moves)],
                                                           device=adapt_model_2.device)
+                    # median_opponent_income = torch.tensor([1.0], device=adapt_model_2.device)
 
                     input = np.concatenate((median_opponent_income, torch.from_numpy(policy)), axis=0)
 
@@ -142,9 +146,14 @@ def main():
 
                 policy = game.get_normal_policy(policy, cur_player)
 
-            # action = np.random.choice(game.action_size, p=policy)
-            action = np.argmax(policy)
+            if np.isnan(policy).any():
+                print("Found NaNs in probabilities")
+
+            action = np.random.choice(game.action_size, p=policy)
+            # action = np.argmax(policy)
             played_action = game.index_to_move[action]
+
+            current_balance += cur_player * moves_values[action]
 
             game.make_move(action, cur_player)
 

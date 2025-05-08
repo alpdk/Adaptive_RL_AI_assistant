@@ -42,10 +42,13 @@ class BaseProbsTemplate:
             np.array[]: probabilities of each action
         """
         action_probs = np.zeros(self.game.action_size)
+        min_val = np.min(values)
+        max_val = np.max(values)
+
         for child in root.children:
             action = child.action_taken
             # action_probs[action] = math.exp(values[action])
-            action_probs[action] += child.visit_count
+            action_probs[action] = math.pow(values[action] + 1, 2) / (1 - values[action] + 1e-5)
         action_probs /= np.sum(action_probs)
 
         return action_probs
