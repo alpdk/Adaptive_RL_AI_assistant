@@ -263,6 +263,10 @@ class Game:
         valid_moves = self.get_moves_to_np_array(valid_moves)
 
         policy = policy * valid_moves
+
+        if np.all(policy == 0):
+            policy = valid_moves
+
         policy = policy / np.sum(policy)
 
         return policy
@@ -275,7 +279,7 @@ class Game:
             values (np.array): values of moves from current state
             player (int): index of the player who took the action
         """
-        values = torch.softmax(values, axis=1).squeeze(0).detach().cpu().numpy()
+        values = values.squeeze(0).detach().cpu().numpy()
 
         valid_moves = self.get_valid_moves(player)
         valid_moves = self.get_moves_to_np_array(valid_moves)

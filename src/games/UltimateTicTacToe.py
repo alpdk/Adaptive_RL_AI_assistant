@@ -326,22 +326,29 @@ class UltimateTicTacToe(Game):
         res = self._check_field_win(state, move, player)
 
         if player == res:
+            return 1, True
+
+        for i in range(self.row_count * self.column_count):
+            row, column = self.index_to_move[i]
+
+            if state[row, column] == None:
+                return None, False
+
+        cur_player, opponent_player = 0, 0
+
+        for i in range(self.row_count):
+            for j in range(self.column_count):
+                if state[i, j] == player:
+                    cur_player += 1
+                elif state[i, j] == -player:
+                    opponent_player += 1
+
+        if cur_player > opponent_player:
             res = 1
+        elif cur_player < opponent_player:
+            res = -1
+        else:
+            res = 0
 
-        if res == 0:
-            cur_player, opponent_player = 0, 0
-
-            for i in range(self.row_count):
-                for j in range(self.column_count):
-                    if state[i, j] == player:
-                        cur_player += 1
-                    elif state[i, j] == -player:
-                        opponent_player += 1
-
-            if cur_player > opponent_player:
-                res = 1
-            elif cur_player < opponent_player:
-                res = -1
-
-        return res, res is not None
+        return res, True
 
