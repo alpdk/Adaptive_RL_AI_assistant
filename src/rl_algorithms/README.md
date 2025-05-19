@@ -3,7 +3,7 @@
 At this directory should be placed RL Algorithm, that will be used in training and should implement *AlgorithmsTemplate*
 class.
 
-## Variables and function that should be determined
+## Variables and function that should be determined and implemented
 
 ***Variables:***
 
