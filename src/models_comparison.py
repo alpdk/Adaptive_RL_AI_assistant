@@ -18,7 +18,7 @@ train_args = {
     'relevance_coef': 1.0
 }
 
-def parse_compression_arguments():
+def parse_comparison_arguments():
     """
     Parse command line arguments
 
@@ -70,7 +70,7 @@ def main():
     """
     Main function for Compression of models
     """
-    args = parse_compression_arguments()
+    args = parse_comparison_arguments()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

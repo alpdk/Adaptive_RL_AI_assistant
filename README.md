@@ -11,21 +11,22 @@ structures. All of them should be placed inside of directories with names: games
 For training model you should implement game, rl_algorithm, and model structure. All of them should be placed in
 corresponding directories. Guides for implementation of every part can be found inside of each directory.
 
-After that, you should run train_model_script, that require variables:
+After that, you should run train_model, that require variables:
 
 1) Name of the game
-2) RL algorithm name
 2) Name of the model structure
+3) RL algorithm name
+
 
 Example:
 
 ``
-python train_model.py UltimateTicTacToe ResNet AlphaZero
+python train_model.py Checkers ResNet MCTS 0
 ``
 
 ## How to compare models
 
-For compression of models you should run scrypt `models_compression.py`. 
+For compression of models you should run scrypt `models_comparison.py`. 
 
 This scrypt require next variables:
 
@@ -39,5 +40,5 @@ This scrypt require next variables:
 Example:
 
 ``
-python models_compression.py Checkers 10 AlphaZero ResNet AlphaZero ResNet
+python models_comparison.py Checkers 1000 MCTS ResNet MCTS ResNet 0
 ``
