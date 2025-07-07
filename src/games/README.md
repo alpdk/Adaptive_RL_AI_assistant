@@ -11,9 +11,14 @@ players.
 Examples of board games, that can be implemented with such interface:
 
 1) Checkers
-2) Ultimate Tic-Tac-Toe
+2) Chess
+3) TicTacToe
 
-## Variables and function that should be determined and implemented
+Examples of games, that cannot be implemented:
+
+1) Dungeon and Dragons (There is no defined field, and countless ways to move)
+
+## Variables and function that should be determined
 
 ***Variables:***
 
@@ -27,16 +32,13 @@ Examples of board games, that can be implemented with such interface:
   length of *index_to_move* and *move_to_index* dictionaries
 * **game_name**: string that contain name of the game. This string will be used in saving model weights and for search
   of game class.
-* **logger**: logger of the game, that will help to steps back in game history.
 
 ***Methods:***
 
-* **get_row**: method for getting amount of rows in game.
-* **get_column**: method for getting amount of columns in game.
 * **_get_figures_kinds**: method that return list of every possible figures in game.
 * **_get_index_to_move**: method that return generate *index_to_move* dictionary.
-* **_get_initial_state**: method for getting clear board of the game.
-* **make_move**: method that implement move execution.
+* **get_next_state**: method that return np.array of the current field state. As input it gets current state, player,
+  and move that should be executed.
 * **get_valid_moves**: method that return np.array of integers, where possible moves are marked by 1, otherwise by 0.
   As input it receive current state of the game and current player.
 * **get_next_player**: method that return index of next player. As input it takes current state of the game, player, and
