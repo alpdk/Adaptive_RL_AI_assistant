@@ -1,4 +1,8 @@
+import copy
 import random
+from multiprocessing import Process, Queue, Lock
+import time
+
 import numpy as np
 
 import torch
@@ -6,6 +10,9 @@ import torch.nn.functional as F
 
 from tqdm import trange
 
+# from src.external_methods_and_arguments import load_game, load_model_structure, load_rl_algorithm
+from src.games.UltimateTicTacToe import UltimateTicTacToe
+from src.models_structures.base_play.ResNet import ResNet
 from src.rl_algorithms.base_rl_algorithms.MCTS.MCTS import MCTS
 from src.rl_algorithms.TrainerTemplate import TrainerTemplate
 
@@ -23,7 +30,7 @@ class BaseTrainer(TrainerTemplate):
         args ({}): arguments that will be passed to the algorithm
     """
 
-    def selfPlay(self):
+    def selfPlay(self, game, algorithm):
         """
         Algorithm of playing game, until will be reached a terminal state of the game
 
@@ -34,24 +41,29 @@ class BaseTrainer(TrainerTemplate):
         player = 1
         layer = 0
 
+        # counter = 0
+
         while True:
-            data = self.check_existing_layers(layer)
+            # data = self.check_existing_layers(layer)
+            #
+            # if data is None:
+            #     action_probs, moves_values = self.algorithm.search(player)
+            #     self.save_data_in_layer(action_probs, moves_values, layer)
+            # else:
+            #     action_probs, moves_values = data[0], data[1]
+            action_probs, moves_values = algorithm.search(player)
+            # print(f"Move number: {counter}")
+            # counter += 1
 
-            if data is None:
-                action_probs, moves_values = self.algorithm.search(player)
-                self.save_data_in_layer(action_probs, moves_values, layer)
-            else:
-                action_probs, moves_values = data[0], data[1]
-
-            memory.append((self.game.logger.current_state, action_probs, moves_values, player))
+            memory.append((game.logger.current_state, action_probs, moves_values, player))
 
             # temperature_action_probs = action_probs ** (1 / self.args['temperature'])
             # action_probs = temperature_action_probs / np.sum(temperature_action_probs)
-            action = np.random.choice(self.game.action_size, p=action_probs)
-            self.game.make_move(action, player)
+            action = np.random.choice(game.action_size, p=action_probs)
+            game.make_move(action, player)
             layer += 1
 
-            value, is_terminal = self.game.get_value_and_terminated(player)
+            value, is_terminal = game.get_value_and_terminated(player)
 
             if is_terminal:
                 returnMemory = []
@@ -59,17 +71,17 @@ class BaseTrainer(TrainerTemplate):
                     hist_outcome = value if hist_player == player else -value
 
                     returnMemory.append((
-                        self.game.get_encoded_state(hist_neutral_state),
+                        game.get_encoded_state(hist_neutral_state),
                         hist_action_probs,
                         hist_moves_values,
                         hist_player,
                         hist_outcome
                     ))
 
-                self.game.revert_full_game()
+                game.revert_full_game()
                 return returnMemory
 
-            player = self.game.get_next_player(action, player)
+            player = game.get_next_player(action, player)
 
     def train(self, memory):
         """
@@ -142,6 +154,43 @@ class BaseTrainer(TrainerTemplate):
         print(f"moves_values_loss: {overall_moves_values_loss / (len(memory) // self.args['batch_size'] + 1)}")
         print(f"value_loss: {overall_value_loss / (len(memory) // self.args['batch_size'] + 1)}")
 
+    def thread_self_play(self, lock, queue):
+        """
+        Method for parallel running and saving games
+
+        Args:
+             lock (): locker
+             queue (Queue): memory of the games
+        """
+        with lock:
+            # base_model = copy.deepcopy(self.base_model)
+            # optimizer = copy.deepcopy(self.optimizer)
+            # game = load_game("UltimateTicTacToe")
+            game = UltimateTicTacToe(3, 3)
+            model = ResNet(game, 4, 64, self.base_model.device)
+            # model = load_model_structure("ResNet", game, self.base_model.device)
+            model.load_state_dict(self.base_model.state_dict())
+            algorithm = MCTS(game, self.args, model)
+            args = self.args.copy()
+            # algorithm = load_rl_algorithm("MCTS", game, self.args, model)
+            # args = copy.deepcopy(self.args)
+
+            # algorithm.game = self.game
+            # algorithm.model = self.base_model
+
+            res = []
+
+        # print(self.game)
+
+        res = []
+
+        for selfPlay_iteration in trange(args['num_selfPlay_iterations']):
+            res += self.selfPlay(game, algorithm)
+
+        with lock:
+            queue.put(res)
+
+
     def learn(self):
         """
         Whole process of learning model on a base of played games
@@ -151,13 +200,29 @@ class BaseTrainer(TrainerTemplate):
         """
         model_dir, optimizer_dir = self.save_directories()
 
+        lock = Lock()
+
+        processes = []
+        queue = Queue()
+        amount_of_threads = 1
+        self.args['num_selfPlay_iterations'] = self.args['num_selfPlay_iterations'] // amount_of_threads + 1
+
         for iteration in trange(self.args['num_iterations']):
             memory = []
 
-            self.base_model.eval()
+            # for _ in range(amount_of_threads):
+            #     p = Process(target=self.thread_self_play, args=(lock, queue))
+            #     p.start()
+            #     processes.append(p)
+            #
+            # for p in processes:
+            #     p.join()
+            #
+            # while not queue.empty():
+            #     memory += queue.get()
 
             for selfPlay_iteration in trange(self.args['num_selfPlay_iterations']):
-                memory += self.selfPlay()
+                memory += self.selfPlay(self.game, self.algorithm)
 
             self.clear_save_states()
 

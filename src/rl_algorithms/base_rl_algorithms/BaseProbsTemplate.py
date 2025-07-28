@@ -45,10 +45,17 @@ class BaseProbsTemplate:
         min_val = np.min(values)
         max_val = np.max(values)
 
+        original_actions = action_probs
+
         for child in root.children:
             action = child.action_taken
             # action_probs[action] = math.exp(values[action])
-            action_probs[action] = math.pow(values[action] + 1, 2) / (1 - values[action] + 1e-5)
+            action_probs[action] = math.pow(max(values[action] + 1, 0.05), 2) / max((1 - values[action]), 0.05)
+
+        if np.sum(action_probs) == 0:
+            print("What the hell!!!")
+            print(original_actions)
+
         action_probs /= np.sum(action_probs)
 
         return action_probs

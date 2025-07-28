@@ -66,7 +66,7 @@ class UltimateTicTacToe(Game):
         Returns:
             column_count (int): count of rows in the game
         """
-        return self.column_count * self.column_count
+        return self.column_count * self.column_count + 2
 
     def _get_figures_kinds(self):
         """
@@ -111,8 +111,9 @@ class UltimateTicTacToe(Game):
         Returns:
             np.array(): 2d array of shape (rows * rows, columns * columns) with initial state of figures
         """
-        state = np.zeros((self.row_count * self.row_count, self.column_count * self.column_count))
-
+        state = np.zeros((self.row_count * self.row_count + 2, self.column_count * self.column_count))
+        state[9] = -1
+        state[10] = 0
         return state
 
     def _check_line(self, field, row_start, column_start, row_change, column_change, player):

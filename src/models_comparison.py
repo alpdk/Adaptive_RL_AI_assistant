@@ -149,8 +149,8 @@ def main():
             if np.isnan(policy).any():
                 print("Found NaNs in probabilities")
 
-            action = np.random.choice(game.action_size, p=policy)
-            # action = np.argmax(policy)
+            # action = np.random.choice(game.action_size, p=policy)
+            action = np.argmax(policy)
             played_action = game.index_to_move[action]
 
             current_balance += cur_player * moves_values[action]

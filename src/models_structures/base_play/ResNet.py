@@ -9,9 +9,9 @@ class ResNet(nn.Module):
     Attributes:
         device (): Device that the model will be trained on
         startBlock (nn.Sequential): first block of the model
-        backBone1 (nn.Sequential): backbone of the model constructed from ResBlocks
+        backBone (nn.Sequential): backbone of the model constructed from ResBlocks
         policyHead (nn.Sequential): policy head of the model
-        movesValueHead (nn.Sequential): moves value head of the model
+        # movesValueHead (nn.Sequential): moves value head of the model
         valueHead (nn.Sequential): value head of the model
         structure_name (string): name of the model structure
     """
@@ -35,7 +35,7 @@ class ResNet(nn.Module):
             nn.ReLU()
         )
 
-        self.backBone1 = nn.ModuleList(
+        self.backBone = nn.ModuleList(
             [ResBlock(num_hidden) for i in range(num_resBlocks)]
         )
 
@@ -47,19 +47,19 @@ class ResNet(nn.Module):
             nn.Linear(32 * game.get_column() * game.get_row(), game.action_size)
         )
 
-        self.movesValueHead = nn.Sequential(
-            nn.Conv2d(num_hidden, num_hidden, kernel_size=3, padding=1),
-            nn.BatchNorm2d(num_hidden),
-            nn.ReLU(),
-            nn.Conv2d(num_hidden, num_hidden, kernel_size=3, padding=1),
-            nn.BatchNorm2d(num_hidden),
-            nn.ReLU(),
-            nn.Conv2d(num_hidden, 32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.Flatten(),
-            nn.Linear(32 * game.get_column() * game.get_row(), game.action_size)
-        )
+        # self.movesValueHead = nn.Sequential(
+        #     nn.Conv2d(num_hidden, num_hidden, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(num_hidden),
+        #     nn.ReLU(),
+        #     nn.Conv2d(num_hidden, num_hidden, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(num_hidden),
+        #     nn.ReLU(),
+        #     nn.Conv2d(num_hidden, 32, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(32),
+        #     nn.ReLU(),
+        #     nn.Flatten(),
+        #     nn.Linear(32 * game.get_column() * game.get_row(), game.action_size)
+        # )
 
         self.valueHead = nn.Sequential(
             nn.Conv2d(num_hidden, len(game.figures_kinds), kernel_size=3, padding=1),
@@ -87,12 +87,12 @@ class ResNet(nn.Module):
             value (int): value from current state.
         """
         x = self.startBlock(x)
-        for resBlock in self.backBone1:
+        for resBlock in self.backBone:
             x = resBlock(x)
         policy = self.policyHead(x)
-        move_values = self.movesValueHead(x)
+        # move_values = self.movesValueHead(x)
         value = self.valueHead(x)
-        return policy, move_values, value
+        return policy, value
 
 
 class ResBlock(nn.Module):

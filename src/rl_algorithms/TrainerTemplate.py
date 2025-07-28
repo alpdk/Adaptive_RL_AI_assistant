@@ -174,7 +174,7 @@ class TrainerTemplate:
                 print(f"Error deleting {file_path}: {e}")
 
     @abstractmethod
-    def selfPlay(self):
+    def selfPlay(self, game, algorithm):
         """
         Algorithm of playing game, until will be reached a terminal state of the game
 

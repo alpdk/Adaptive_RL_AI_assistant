@@ -21,7 +21,7 @@ class AdaptTrainer(TrainerTemplate):
         args ({}): arguments that will be passed to the algorithm
     """
 
-    def selfPlay(self):
+    def selfPlay(self, game, algorithm):
         """
         Algorithm of playing game, until will be reached a terminal state of the game
 

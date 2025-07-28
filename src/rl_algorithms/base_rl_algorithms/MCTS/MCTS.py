@@ -40,6 +40,7 @@ class MCTS(BaseProbsTemplate):
             action_values (np.array): action values
         """
         root = Node(self.game, self.args, player, None, None, visit_count=1)
+        # print(self.game)
 
         policy, _, value = self.model(torch.tensor(self.game.get_encoded_state(self.game.logger.current_state),
                                                    device=self.model.device).unsqueeze(0))
@@ -55,6 +56,8 @@ class MCTS(BaseProbsTemplate):
         policy = policy / np.sum(policy)
 
         root.expand(policy, player)
+
+        # print("First move in search finished!")
 
         for search in range(self.args['num_searches']):
             node = root
@@ -76,6 +79,7 @@ class MCTS(BaseProbsTemplate):
             value, is_terminal = self.game.get_value_and_terminated(last_move_player)
 
             if not is_terminal:
+                # print('Terminal State reached')
                 policy, _, value = self.model(torch.tensor(self.game.get_encoded_state(self.game.logger.current_state),
                                                            device=self.model.device).unsqueeze(0))
                 cur_player = node.player
@@ -96,5 +100,6 @@ class MCTS(BaseProbsTemplate):
         # while node.is_fully_expanded():
         #     node = node.select(player)
         #     self.game.make_move(node.action_taken, node.parent.player)
+        # print('Finished search')
 
         return action_probs, action_values

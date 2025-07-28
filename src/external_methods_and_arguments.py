@@ -29,9 +29,9 @@ def load_game(name: str):
 
     match name:
         case "checkers":
-            return Checkers(4, 4)
+            return Checkers(8, 8)
         case "ultimatetictactoe":
-            return UltimateTicTacToe(2, 2)
+            return UltimateTicTacToe(3, 3)
         case _:
             return None
 

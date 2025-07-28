@@ -157,7 +157,7 @@ class AdaptProbs(AdaptProbsTemplate):
             if self.game.logger.action_values[i] != 0:
                 median_income = ((self.game.logger.action_values[i] - min_val) /
                                  (max_val - min_val))
-                new_probs[i] = 1.0 / (abs(median_income - median_opponent_income) + 1e-3)
+                new_probs[i] = 1.0 / max(median_income - median_opponent_income, 1e-3)
         #         new_probs[i] = 1.0 / (abs(self.game.logger.action_values[i] - median_player_income) + 1e-3)
 
         # for i in range(len(self.game.logger.action_values)):
