@@ -44,7 +44,7 @@ class Game:
         res[valid_moves] = 1
         return res
 
-    def get_encoded_state(self, state):
+    def get_encoded_state(self):
         """
         Returns the encoded state of the game in a format of boards, where every board contain
         only 1 type of the figures.
@@ -52,14 +52,15 @@ class Game:
         Returns:
             encoded_state (np.array()): 3d array of shape (len(figures_kinds), rows, columns)
         """
-        encoded_state = np.stack(
-            [state == condition for condition in self.figures_kinds]
-        ).astype(np.float32)  # 2 represents the kinged pieces
-
-        if len(state.shape) == 3:
-            encoded_state = np.swapaxes(encoded_state, 0, 1)
-
-        return encoded_state
+        pass
+        # encoded_state = np.stack(
+        #     [self.state == condition for condition in self.figures_kinds]
+        # ).astype(np.float32)  # 2 represents the kinged pieces
+        #
+        # if len(self.state.shape) == 3:
+        #     encoded_state = np.swapaxes(encoded_state, 0, 1)
+        #
+        # return encoded_state
 
     @abstractmethod
     def _get_figures_kinds(self):

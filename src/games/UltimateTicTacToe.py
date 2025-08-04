@@ -314,7 +314,7 @@ class UltimateTicTacToe(Game):
 
         changes['board_res'] = self.state[-1][board]
         changes['next_board'] = self.state[-2]
-        changes['prev_moving_player'] = self.logger.current_player
+        # changes['prev_moving_player'] = self.logger.current_player
 
         new_logger_node = LoggerNode(self.get_next_player(), changes, self.logger)
         self.logger.child = new_logger_node
@@ -326,15 +326,28 @@ class UltimateTicTacToe(Game):
 
         Returns:
             value (int): value of the game
-            terminated (bool): terminated or not
         """
         board = self.logger.changes["move_index"] // (self.column_count * self.row_count)
 
-        if self._check_board_win(-1, board, self.logger.changes['prev_moving_player']):
-            return self.logger.changes['prev_moving_player'], True
+        if self._check_board_win(-1, board, self.logger.parent.current_player):
+            return self.logger.parent.current_player
 
-        return (0, False) if self._check_board_usability(-1) else (None, True)
+        return 0 if self._check_board_usability(-1) else None
 
+    def get_encoded_state(self):
+        pointer = self.state[9, 0]
+
+        encoded_state = np.stack(
+            (self.state == -1, self.state == 0, self.state == 1)
+        ).astype(np.float32)
+
+        if len(self.state.shape) == 3:
+            encoded_state = np.swapaxes(encoded_state, 0, 1)
+
+        for i in range(len(encoded_state)):
+            encoded_state[i, 9] = pointer
+
+        return encoded_state
 
     # def _get_index_to_move(self):
     #     """
@@ -607,4 +620,3 @@ class UltimateTicTacToe(Game):
     #         res = 0
     #
     #     return res, True
-

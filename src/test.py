@@ -73,20 +73,45 @@
 #
 # print(score)
 
+# from src.games.UltimateTicTacToe import UltimateTicTacToe
+#
+# game = UltimateTicTacToe()
+#
+# while True:
+#     print(game.get_valid_moves())
+#
+#     move = int(input("What is your move: "))
+#
+#     game.make_move(move)
+#
+#     winner = game.get_value_and_terminated()
+#
+#     if winner != 0:
+#         print(f"Our winner is {winner}!")
+#         break
+#
+#     encoded_state = game.get_encoded_state()
+
+import torch
+import torch.nn as nn
+
+from src.models_structures.ResNet import ResNet
+from src.models_structures.ModifiedResNet import ModifiedResNet
 from src.games.UltimateTicTacToe import UltimateTicTacToe
 
 game = UltimateTicTacToe()
 
-while True:
-    print(game.get_valid_moves())
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    move = int(input("What is your move: "))
+# base_weights = torch.load('src/weights/model/model_9_UTTT.pt', map_location=device)
+model = ModifiedResNet(game, 9, 128, device=device)
 
-    game.make_move(move)
+model.load_state_dict(torch.load('src/weights/model/modified_model_UTTT.pt', map_location=device))
+model.to(device)
+model.eval()  # if you're going to use it for inference
 
-    winner, game_fin = game.get_value_and_terminated()
+encoded_state = torch.tensor(game.get_encoded_state(),device=model.device).unsqueeze(0)
+policy, move_values, value = model(encoded_state)
+policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
 
-    if game_fin:
-        print(f"Our winner is {winner}!")
-        break
-
+print(policy)
