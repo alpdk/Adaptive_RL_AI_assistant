@@ -132,11 +132,10 @@ class Game:
 
         Returns:
             value (int): value of the game
-            terminated (bool): terminated or not
         """
         pass
 
-    def get_normal_policy(self, policy, player):
+    def get_normal_policy(self, policy):
         """
         Return normalized policy of moves
 
@@ -146,7 +145,7 @@ class Game:
         """
         policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
 
-        valid_moves = self.get_valid_moves(player)
+        valid_moves = self.get_valid_moves()
         valid_moves = self.get_moves_to_np_array(valid_moves)
 
         policy = policy * valid_moves
@@ -168,13 +167,19 @@ class Game:
         """
         values = values.squeeze(0).detach().cpu().numpy()
 
-        valid_moves = self.get_valid_moves(player)
+        valid_moves = self.get_valid_moves()
         valid_moves = self.get_moves_to_np_array(valid_moves)
 
         values = values * valid_moves
 
         return values
 
+    @abstractmethod
+    def revert_move(self, *args, **kwargs):
+        """
+        Method for reverting moves
+        """
+        pass
     # def collect_opponent_moves(self, history_depth):
     #     """
     #     Method for collecting opponent moves

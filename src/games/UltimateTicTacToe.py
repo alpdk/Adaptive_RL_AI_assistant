@@ -349,6 +349,20 @@ class UltimateTicTacToe(Game):
 
         return encoded_state
 
+    def revert_move(self, state, logger_pointer):
+        """
+        Method for returning to specific state of the game
+
+        Args:
+            state (np.array): State of the game for returning
+            logger_pointer (LoggerNode): Pointer to the logger node
+        """
+        self.state = state
+
+        self.logger = logger_pointer
+        self.logger.child.parent = None
+        self.logger.child = None
+
     # def _get_index_to_move(self):
     #     """
     #     Create a dictionary mapping index to move. (move can be of any type)
