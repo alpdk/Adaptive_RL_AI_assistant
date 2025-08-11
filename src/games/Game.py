@@ -44,10 +44,13 @@ class Game:
         res[valid_moves] = 1
         return res
 
-    def get_encoded_state(self):
+    def get_encoded_state(self, state):
         """
         Returns the encoded state of the game in a format of boards, where every board contain
         only 1 type of the figures.
+
+        Args:
+            state (np.array): state of the game
 
         Returns:
             encoded_state (np.array()): 3d array of shape (len(figures_kinds), rows, columns)
@@ -132,6 +135,7 @@ class Game:
 
         Returns:
             value (int): value of the game
+            terminated (bool): is game finished
         """
         pass
 
@@ -143,7 +147,7 @@ class Game:
             policy (np.array): Policy of moves from current state
             player (int): index of the player who took the action
         """
-        policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
+        # policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
 
         valid_moves = self.get_valid_moves()
         valid_moves = self.get_moves_to_np_array(valid_moves)

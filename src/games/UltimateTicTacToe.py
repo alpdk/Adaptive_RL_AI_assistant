@@ -1,3 +1,5 @@
+import copy
+
 import torch
 import numpy as np
 
@@ -326,22 +328,33 @@ class UltimateTicTacToe(Game):
 
         Returns:
             value (int): value of the game
+            terminated (bool): is game finished
         """
         board = self.logger.changes["move_index"] // (self.column_count * self.row_count)
 
         if self._check_board_win(-1, board, self.logger.parent.current_player):
-            return self.logger.parent.current_player
+            return (self.logger.parent.current_player, True)
 
-        return 0 if self._check_board_usability(-1) else None
+        return (None, False) if self._check_board_usability(-1) else (0, True)
 
-    def get_encoded_state(self):
-        pointer = self.state[9, 0]
+    def get_encoded_state(self, state):
+        """
+        Returns the encoded state of the game in a format of boards, where every board contain
+        only 1 type of the figures.
+
+        Args:
+            state (np.array): state of the game
+
+        Returns:
+            encoded_state (np.array()): 3d array of shape (len(figures_kinds), rows, columns)
+        """
+        pointer = state[9, 0]
 
         encoded_state = np.stack(
-            (self.state == -1, self.state == 0, self.state == 1)
+            (state == -1, state == 0, state == 1)
         ).astype(np.float32)
 
-        if len(self.state.shape) == 3:
+        if len(state.shape) == 3:
             encoded_state = np.swapaxes(encoded_state, 0, 1)
 
         for i in range(len(encoded_state)):
@@ -357,7 +370,7 @@ class UltimateTicTacToe(Game):
             state (np.array): State of the game for returning
             logger_pointer (LoggerNode): Pointer to the logger node
         """
-        self.state = state
+        self.state = copy.deepcopy(state)
 
         self.logger = logger_pointer
         self.logger.child.parent = None

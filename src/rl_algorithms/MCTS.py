@@ -1,5 +1,8 @@
+import copy
 import math
 import random
+import time
+
 import numpy as np
 import torch
 
@@ -29,6 +32,9 @@ class TreeNode:
             parent (TreeNode): Parent node
             children ([TreeNode]): List of children
         """
+        if children is None:
+            children = []
+
         self.args = args
         self.player = player
         self.action_taken = action_taken
@@ -103,7 +109,7 @@ class TreeNode:
             policy (np.array[]): A numpy array representing the policy of making move by a player
             game (Game): game that is used
         """
-        game_state = game.state
+        game_state = copy.deepcopy(game.state)
         logger_pointer = game.logger
 
         for action, prob in enumerate(policy):
@@ -112,7 +118,7 @@ class TreeNode:
                 next_player = game.logger.current_player
                 game.revert_move(game_state, logger_pointer)
 
-                child = TreeNode(self.args, action, next_player, self)
+                child = TreeNode(self.args, next_player, action, self)
                 self.children.append(child)
 
     def backpropagation(self, value, whose_value, current_root):
@@ -132,7 +138,7 @@ class TreeNode:
             else:
                 self.value_sum -= value
 
-            self.parent.backpropagation(value, whose_value)
+            self.parent.backpropagation(value, whose_value, current_root)
 
 
 class MCTS:
@@ -146,7 +152,7 @@ class MCTS:
         algorithm_name (str): Name of the algorithm
     """
 
-    def __init__(self, args, algorithm_name):
+    def __init__(self, args):
         """
         Constructor
 
@@ -157,7 +163,7 @@ class MCTS:
         self.args = args
         self.root = TreeNode(args)
         self.current_node = self.root
-        self.algorithm_name = algorithm_name
+        self.algorithm_name = "MCTS"
 
     def calc_probs(self, game, values=None):
         """
@@ -174,7 +180,7 @@ class MCTS:
 
         original_actions = action_probs
 
-        for child in self.root.children:
+        for child in self.current_node.children:
             action = child.action_taken
             # action_probs[action] = math.exp(values[action])
             action_probs[action] = math.pow(max(values[action] + 1, 0.05), 2) / max((1 - values[action]), 0.05)
@@ -198,7 +204,7 @@ class MCTS:
             np.array[]: values of each action
         """
         action_values = np.zeros(game.action_size)
-        for child in self.root.children:
+        for child in self.current_node.children:
             action = child.action_taken
             action_values[action] = child.value_sum / child.visit_count
 
@@ -216,6 +222,7 @@ class MCTS:
             action_probs (np.array): action probabilities
             action_values (np.array): action values
         """
+        # start_time = time.perf_counter()
         policy, _, value = model(torch.tensor(game.get_encoded_state(game.state),
                                                    device=model.device).unsqueeze(0))
 
@@ -227,25 +234,30 @@ class MCTS:
         valid_moves = game.get_valid_moves()
         valid_moves = game.get_moves_to_np_array(valid_moves)
 
+        policy = policy * valid_moves
         policy = game.get_normal_policy(policy)
 
-        # policy = policy * valid_moves
         # policy = policy / np.sum(policy)
 
         if not self.current_node.is_fully_expanded():
             self.current_node.expand(policy, game)
 
-        while self.root.visit_count < self.args['num_searches']:
+        while self.current_node.visit_count < self.args['num_searches']:
             node = self.current_node
 
-            save_state = game.state
+            save_state = copy.deepcopy(game.state)
             logger_pointer = game.logger
 
             while node.is_fully_expanded():
                 if node.policy is None:
                     policy, _, _ = model(torch.tensor(game.get_encoded_state(game.state),
                                                            device=model.device).unsqueeze(0))
+                    policy = policy.squeeze(0).detach().cpu().numpy()
 
+                    valid_moves = game.get_valid_moves()
+                    valid_moves = game.get_moves_to_np_array(valid_moves)
+
+                    policy = policy * valid_moves
                     policy = game.get_normal_policy(policy)
 
                     node.policy = policy
@@ -253,26 +265,40 @@ class MCTS:
                 node = node.select()
                 game.make_move(node.action_taken)
 
-                last_move_player = node.parent.player
-                value = game.get_value_and_terminated(last_move_player)
+            last_move_player = node.parent.player
+            value, terminated = game.get_value_and_terminated()
 
-                if value == 0:
-                    # print('Terminal State reached')
-                    policy, _, value = model(
-                        torch.tensor(game.get_encoded_state(game.state),
-                                     device=model.device).unsqueeze(0))
-                    cur_player = node.player
+            if not terminated:
+                policy, _, value = model(torch.tensor(game.get_encoded_state(game.state),
+                                                       device=model.device).unsqueeze(0))
+                cur_player = node.player
 
-                    policy = game.get_normal_policy(policy)
-                    value = value.item()
+                policy = policy.squeeze(0).detach().cpu().numpy()
+                valid_moves = game.get_valid_moves()
+                valid_moves = game.get_moves_to_np_array(valid_moves)
 
-                    node.expand(policy, cur_player)
+                policy = policy * valid_moves
+                policy = game.get_normal_policy(policy)
+                value = value.item()
 
-                node.backpropagation(value, last_move_player, self.current_node)
-                game.revert_move(save_state, logger_pointer)
+                node.expand(policy, game)
+
+            # if value == None:
+
+            node.backpropagation(value, last_move_player, self.current_node)
+            game.revert_move(save_state, logger_pointer)
 
         action_values = self.calc_values(game)
+        # valid_moves = game.get_valid_moves()
+        # valid_moves = game.get_moves_to_np_array(valid_moves)
+        #
+        # action_values = action_values * valid_moves
         action_probs = self.calc_probs(game, action_values)
+        # end_time = time.perf_counter()
+
+        # elapsed_time = end_time - start_time
+        # # print(f"Operation result: {result}")
+        # print(f"Search time: {elapsed_time:.6f} seconds")
 
         return action_probs, action_values
 
@@ -287,3 +313,9 @@ class MCTS:
             if child.action_taken == action_taken:
                 self.current_node = child
                 break
+
+    def return_to_root(self):
+        """
+        Method for returning tree to the root
+        """
+        self.current_node = self.root

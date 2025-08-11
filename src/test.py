@@ -72,6 +72,8 @@
 #     game.revert_full_game()
 #
 # print(score)
+import torch
+from nbformat.sign import algorithms
 
 # from src.games.UltimateTicTacToe import UltimateTicTacToe
 #
@@ -92,26 +94,57 @@
 #
 #     encoded_state = game.get_encoded_state()
 
-import torch
-import torch.nn as nn
+# import torch
+# import torch.nn as nn
+#
+# from src.models_structures.ResNet import ResNet
+# from src.models_structures.ModifiedResNet import ModifiedResNet
+# from src.games.UltimateTicTacToe import UltimateTicTacToe
+#
+# game = UltimateTicTacToe()
+#
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#
+# # base_weights = torch.load('src/weights/model/model_9_UTTT.pt', map_location=device)
+# model = ModifiedResNet(game, 9, 128, device=device)
+#
+# model.load_state_dict(torch.load('src/weights/model/modified_model_UTTT.pt', map_location=device))
+# model.to(device)
+# model.eval()  # if you're going to use it for inference
+#
+# encoded_state = torch.tensor(game.get_encoded_state(),device=model.device).unsqueeze(0)
+# policy, move_values, value = model(encoded_state)
+# policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
+#
+# print(policy)
 
-from src.models_structures.ResNet import ResNet
-from src.models_structures.ModifiedResNet import ModifiedResNet
 from src.games.UltimateTicTacToe import UltimateTicTacToe
+from src.models_structures.ModifiedResNet import ModifiedResNet
+from src.rl_algorithms.MCTS import MCTS
+from src.trainers.Trainer import Trainer
 
-game = UltimateTicTacToe()
+args = {
+    'C':  0.57,
+    'tau': 0.737,
+    'num_iterations': 1,
+    'num_searches': 100,
+    'num_selfPlay_iterations': 128,
+    'num_epochs': 100,
+    'batch_size': 64,
+    'temperature': 1.25,
+    'dirichlet_epsilon': 0.25,
+    'dirichlet_alpha': 0.3,
+    'history_depth': 5,
+    'relevance_coef': 1.0
+}
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# base_weights = torch.load('src/weights/model/model_9_UTTT.pt', map_location=device)
+game = UltimateTicTacToe()
 model = ModifiedResNet(game, 9, 128, device=device)
+optimizer = torch.optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.0001)
 
-model.load_state_dict(torch.load('src/weights/model/modified_model_UTTT.pt', map_location=device))
-model.to(device)
-model.eval()  # if you're going to use it for inference
+algorithms = MCTS(args)
+trainer = Trainer(args)
 
-encoded_state = torch.tensor(game.get_encoded_state(),device=model.device).unsqueeze(0)
-policy, move_values, value = model(encoded_state)
-policy = torch.softmax(policy, axis=1).squeeze(0).detach().cpu().numpy()
-
-print(policy)
+trainer.learn(game, model, optimizer, algorithms)
