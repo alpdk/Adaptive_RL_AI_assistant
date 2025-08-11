@@ -96,7 +96,7 @@ class Trainer(TrainerTemplate):
             # # print(f"Operation result: {result}")
             # print(f"SelfPlay step time: {elapsed_time:.6f} seconds")
 
-    def train(self, model, optimizer, memory):
+    def train(self, model, optimizer, memory, loss_coef):
         """
         Method for changing model weights
 
@@ -104,6 +104,7 @@ class Trainer(TrainerTemplate):
             model (nn.Module): Model that will be trained
             optimizer (optim.Optimizer): Optimizer that will be used
             memory (np.array): memory of the games
+            loss_coef (dict): Loss coefficient
         """
         random.shuffle(memory)
 
@@ -142,9 +143,9 @@ class Trainer(TrainerTemplate):
             # moves_values_loss = F.pairwise_distance(out_moves_values, moves_values_targets, p=2)
             value_loss = F.mse_loss(out_value, value_targets.view(-1, 1))
 
-            loss_coef = {'policy_loss': 1.0,
-                         'moves_values_loss': 1.0,
-                         'value_loss': 0.1}
+            # loss_coef = {'policy_loss': 1.0,
+            #              'moves_values_loss': 1.0,
+            #              'value_loss': 0.1}
 
             loss = (loss_coef['policy_loss'] * policy_loss +
                     loss_coef['moves_values_loss'] * moves_values_loss +
@@ -165,11 +166,11 @@ class Trainer(TrainerTemplate):
             optimizer.step()
         print("Loss: ", overall_mid_loss / (len(memory) // self.args['batch_size'] + 1))
 
-        print(f"policy_loss: {overall_policy_loss / (len(memory) // self.args['batch_size'] + 1)}")
-        print(f"moves_values_loss: {overall_moves_values_loss / (len(memory) // self.args['batch_size'] + 1)}")
-        print(f"value_loss: {overall_value_loss / (len(memory) // self.args['batch_size'] + 1)}")
+        print(f"policy_loss: {loss_coef['policy_loss'] * overall_policy_loss / (len(memory) // self.args['batch_size'] + 1)}")
+        print(f"moves_values_loss: {loss_coef['moves_values_loss'] * overall_moves_values_loss / (len(memory) // self.args['batch_size'] + 1)}")
+        print(f"value_loss: {loss_coef['value_loss'] * overall_value_loss / (len(memory) // self.args['batch_size'] + 1)}")
 
-    def learn(self, game, model, optimizer, algorithm):
+    def learn(self, game, model, optimizer, algorithm, loss_coef):
         """
         Method execution whole loop of training the model
 
@@ -178,6 +179,7 @@ class Trainer(TrainerTemplate):
             model (nn.Module): Model that will be trained
             optimizer (optim.Optimizer): Optimizer that will be used
             algorithm (): RL algorithm
+            loss_coef (dict): Loss coefficient
         """
         model_dir, optimizer_dir = self.save_directories()
 
@@ -194,7 +196,7 @@ class Trainer(TrainerTemplate):
             # self.clear_save_states()
 
             for epoch in trange(self.args['num_epochs']):
-                self.train(model, optimizer, memory)
+                self.train(model, optimizer, memory, loss_coef)
 
             self.save_weights(game_name, algorithm_name, structure_name, model.state_dict(), model_dir, "pth", iteration)
             self.save_weights(game_name, algorithm_name, structure_name, optimizer.state_dict(), optimizer_dir, "pt", iteration)
