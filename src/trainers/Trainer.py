@@ -8,10 +8,10 @@ import torch.nn.functional as F
 
 from tqdm import trange
 
-from src.trainers.TrainerTemplate import TrainerTemplate
+from src.trainers.BaseTrainerTemplate import BaseTrainerTemplate
 
 
-class Trainer(TrainerTemplate):
+class Trainer(BaseTrainerTemplate):
     """
     This class provide whole training loop for the RL models
 
@@ -53,6 +53,7 @@ class Trainer(TrainerTemplate):
             action_probs, moves_values = algorithm.search(game, model)
 
             memory.append((game.state, action_probs, moves_values, game.logger.current_player))
+            game.logger.set_action_probs_and_values(action_probs, moves_values)
 
             # temperature_action_probs = action_probs ** (1 / self.args['temperature'])
             # action_probs = temperature_action_probs / np.sum(temperature_action_probs)
@@ -60,7 +61,7 @@ class Trainer(TrainerTemplate):
             game.make_move(action)
             # layer += 1
 
-            algorithm.change_current_node(action)
+            algorithm.algorithm_step(action)
 
             value, terminated = game.get_value_and_terminated()
 
@@ -78,7 +79,7 @@ class Trainer(TrainerTemplate):
                     ))
 
                 game.revert_move(start_state, logger_pointer)
-                algorithm.return_to_root()
+                algorithm.return_to_base()
 
                 # end_time = time.perf_counter()
                 #

@@ -302,9 +302,9 @@ class MCTS:
 
         return action_probs, action_values
 
-    def change_current_node(self, action_taken):
+    def algorithm_step(self, action_taken):
         """
-        Method that changes the current node
+        Method that makes a step in algorithm
 
         Args:
             action_taken (index): Move index tha twas executed
@@ -314,8 +314,8 @@ class MCTS:
                 self.current_node = child
                 break
 
-    def return_to_root(self):
+    def return_to_base(self):
         """
-        Method for returning tree to the root
+        Method for returning algorithm to the base condition
         """
         self.current_node = self.root
